@@ -1,0 +1,11 @@
+python-Levenshtein
+pillow
+PyPDF2
+PyQt5
+pyzbar
+opencv-python
+numpy
+pyperclip
+requests
+xlrd
+xlwt
