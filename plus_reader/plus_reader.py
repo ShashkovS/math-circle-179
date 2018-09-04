@@ -6,10 +6,10 @@ import importlib
 import pickle
 from multiprocessing import Pool
 from time import time
-from image_iterator import extract_images_from_files
+from .image_iterator import extract_images_from_files
 #if importlib.util.find_spec('PyQt5'):
-from plus_highlighting import feature_qt
-from ImageProcessor import ImageProcessor
+from .plus_highlighting import feature_qt
+from .ImageProcessor import ImageProcessor
 
 np.set_printoptions(linewidth=200)
 

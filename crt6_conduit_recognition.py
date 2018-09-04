@@ -3,7 +3,7 @@ import os
 import numpy as np  # numpy
 import xlwt  # xlwt
 from time import time
-from plus_reader import prc_list_of_files
+from plus_reader.plus_reader import prc_list_of_files
 np.set_printoptions(linewidth=200)
 START_PATH = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__))))
 os.chdir(START_PATH)

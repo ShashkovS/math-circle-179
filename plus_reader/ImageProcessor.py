@@ -2,7 +2,7 @@ import cv2
 import logging
 import numpy as np
 from bisect import bisect_left
-from cell_recognizer import ext_find_filled_cells
+from .cell_recognizer import ext_find_filled_cells
 
 DEBUG = False
 CELL_FILL_COLOR = np.array([[[0, 255, 255]]], dtype=np.uint8)  # GBR, so it's yellow
