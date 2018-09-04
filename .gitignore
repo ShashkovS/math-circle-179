@@ -1,0 +1,6 @@
+CREDENTIALS.py
+results.*
+zscans.pickle
+Scan*.pdf
+.idea
+__pycache__
