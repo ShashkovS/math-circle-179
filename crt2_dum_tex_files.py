@@ -144,8 +144,16 @@ def crt_solutions_tex(sol_data, sol_name):
         return
 
     # sol_data = re.sub(r'(\\vspace\*?\{.*?\})?\s*?(\\noindent)?\s*?\{\\small([^{}]*?\{[^{}]*?\})*?([^{}]*)?\}', r'', sol_data, flags=re.DOTALL)
-    sol_data = re.sub(r'%\\УвеличитьВысоту\{.*?\}', r'\УвеличитьВысоту{25truemm}', sol_data)
-    sol_data = re.sub(r'%\\УвеличитьШирину\{.*?\}', r'\УвеличитьШирину{15truemm}', sol_data)
+    sol_data = re.sub(r'\\a*ppage', r'', sol_data)
+    if 'УвеличитьВысоту' in sol_data:
+        sol_data = re.sub(r'%\\УвеличитьВысоту\{.*?\}', r'\УвеличитьВысоту{25truemm}', sol_data)
+    else:
+        sol_data = re.sub(r'(\\usepackage(?:\[[^\[\]]+\])?{newlistok})', r'\1\n\\УвеличитьВысоту{25truemm}', sol_data)
+    if 'УвеличитьШирину' in sol_data:
+        sol_data = re.sub(r'%\\УвеличитьШирину\{.*?\}', r'\УвеличитьШирину{20truemm}', sol_data)
+    else:
+        sol_data = re.sub(r'(\\usepackage(?:\[[^\[\]]+\])?{newlistok})', r'\1\n\\УвеличитьШирину{20truemm}', sol_data)
+    sol_data = re.sub(r'(\\usepackage(?:\[[^\[\]]+\])?{newlistok})\s*(\\[А-Яа-яёЁ])', r'\1\n\n\2', sol_data)
     END_PROBLEM_MARK = r'\кзадача'
     end_pos = sol_data.rfind(END_PROBLEM_MARK)
     while end_pos >= 0:
@@ -155,19 +163,20 @@ def crt_solutions_tex(sol_data, sol_name):
             npuncts = sol_data[str_pos: end_pos].count('\\пункт')
             puncts_list = ['\\textbf{{{}}})'.format('абвгдежзикл'[i]) for i in range(npuncts)]
             addition = """
-    \\ответ
-    {}
-    \\кответ
-    \\решение
-    {}
-    \\крешение
-    \\spacer\\hrule\\vspace*{{4pt}}
+\\ответ
+{}
+\\кответ
+\\решение
+{}
+\\крешение
+\\spacer\\hrule\\vspace*{{4pt}}
                 """.format('; '.join(puncts_list), '\n'.join(puncts_list)) + '\n' * 8
             sol_data = sol_data[:end_pos + len(END_PROBLEM_MARK)] + addition + sol_data[
                                                                                end_pos + len(END_PROBLEM_MARK):]
         end_pos = sol_data.rfind(END_PROBLEM_MARK, 0, end_pos - 1)
     # Текст готов.
     sol_data = sol_data.replace(r'\graphicspath{{../' + PICT_DIR + '/}}', r'\graphicspath{{' + PICT_DIR + '/}}')
+    sol_data = sol_data.strip()
     with open(sol_name, 'w', encoding='windows-1251') as f:
         f.write(sol_data)
     lg.info(sol_name + ' done')
