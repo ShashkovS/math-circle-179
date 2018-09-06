@@ -1,6 +1,7 @@
 # old code
 # -*- coding: utf-8 -*-.
 from CONSTS import *
+from z_helpers import *
 from PyPDF2 import PdfFileMerger, PdfFileWriter, PdfFileReader
 from copy import copy
 

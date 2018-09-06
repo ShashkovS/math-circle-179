@@ -4,9 +4,10 @@ import ftplib
 import io
 import os
 from CONSTS import *
+from z_helpers import *
 
 # Пока ещё не готово
-# exit()
+exit()
 
 cur_les=29
 # os.chdir('..')

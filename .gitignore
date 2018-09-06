@@ -4,3 +4,5 @@ zscans.pickle
 Scan*.pdf
 .idea
 __pycache__
+cpdf.exe
+cpdfmanual.pdf

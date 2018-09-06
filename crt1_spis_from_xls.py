@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-.
 from CONSTS import *
+from z_helpers import *
 from shutil import copyfile
 from collections import Counter
 
@@ -28,22 +29,8 @@ def gen_spisok_files(res):
     %
     \\список={{%
     """
-    barcodehead = """\
-    \\documentclass[border=5pt]{standalone}
-    \\usepackage[cp1251]{inputenc}      
-    \\usepackage[english, russian]{babel}     
-    \\usepackage{pst-barcode}
-    \\begin{document}
-    \\begin{pspicture}(4mm,44mm)\psbarcode[rotate=270,transx=-1mm,transy=45mm]{%
-    """
-    barcodefoot = """\
-    }{format=rectangle dmre version=8x64}{datamatrix}\end{pspicture}
-\end{document} 
-    """
 
     head = '\n'.join(row.strip() for row in head.splitlines())
-    barcodehead = '\n'.join(row.strip() for row in barcodehead.splitlines())
-    barcodefoot = '\n'.join(row.strip() for row in barcodefoot.splitlines())
     line = r"\start{{{}}}%" + '\n'
     dummy_line = "\\start{\\phantom{Севастьянова Александра}}%"
     bottom = """\\hline}"""
@@ -100,22 +87,8 @@ def gen_pred_spisok_files(res):
      {}\hfill }}%
     \\список={{%
     """
-    barcodehead = """\
-    \\documentclass[border=5pt]{standalone}
-    \\usepackage[cp1251]{inputenc}      
-    \\usepackage[english, russian]{babel}     
-    \\usepackage{pst-barcode}
-    \\begin{document}
-    \\begin{pspicture}(4mm,44mm)\psbarcode[rotate=270,transx=-1mm,transy=45mm]{%
-    """
-    barcodefoot = """\
-    }{format=rectangle dmre version=8x64}{datamatrix}\end{pspicture}
-\end{document} 
-    """
 
     head = '\n'.join(row.strip() for row in head.splitlines())
-    barcodehead = '\n'.join(row.strip() for row in barcodehead.splitlines())
-    barcodefoot = '\n'.join(row.strip() for row in barcodefoot.splitlines())
     line = r"\start{{{}}}%" + '\n'
     dummy_line = "\\start{\\phantom{Севастьянова Александра}}%"
     bottom = """\\hline}"""
@@ -125,9 +98,6 @@ def gen_pred_spisok_files(res):
         cur_names = sorted(((x['ФИО'], x['Клс'], x['Ср3']) for x in res if x['Аудитория'] == aud),
                            key=lambda x: x[0].lower().replace('ё', 'е'))
         cur_names.append(('\\phantom{Севастьянова Александра}', '', ''))
-        #   cur_names.append('\\phantom{Цой Виктор}')
-        #  cur_names.append('\\phantom{Кинчев Константин}')
-        # cur_names.append('\\phantom{Шклярский Эдмунд}')
         if level == 'н':
             cur_names += [('', '', '')] * (36 - len(cur_names))
         else:
@@ -248,10 +218,10 @@ def gen_mega_floor_lists(res):
 \begin{document}"""
     page_head = r"""%
 \begin{center}
-\scalebox{1.5}{\Huge{\textbf{Математический кружок для 5-6 классов}}}
+\scalebox{1.5}{\Huge{\textbf{CIRCLE_TITLE}}}
 \end{center}
 \fontsize{12}{13.6}\selectfont
-\rowcolors{2}{gray!15}{white}"""
+\rowcolors{2}{gray!15}{white}""".replace('CIRCLE_TITLE', CIRCLE_TITLE)
     table_head = r"""%
 \hfil
 \begin{tabular}[t]{|l|c|}\hline
