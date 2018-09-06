@@ -3,9 +3,13 @@ import xlrd
 import pickle
 from collections import defaultdict
 from functools import lru_cache
+from pdf417gen import encode, render_image
 from CONSTS import *
 from BIN_PATH import *
 import logging
+import re
+import sys
+import zlib
 logging.basicConfig(level=logging.INFO)
 lg = logging.getLogger('ВМШ')
 
@@ -52,9 +56,7 @@ def compile_tex(filename, add_path=''):
 
     for row in output.splitlines():
         if b'Output written' in row:
-            lg.info(row)
             lg.info(row.decode('utf-8'))
-
             return row.decode('utf-8')
 
 
@@ -94,6 +96,24 @@ def cond_color(val):
         print('АААА! Число больше 1')
 
 
+def check_ids_unique(res):
+    lg.info('Проверяем уникальность ID')
+    print(res)
+    ids = {}
+    for i, row in enumerate(res):
+        orig_id = str(row['ID'])
+        dig_id = re.sub(r'[^0-9]', '', orig_id)[-4:].lstrip('0')
+        if not dig_id:
+            lg.error('В строке {} находится ID школьника {}, в котором нет ненулевых цифр. Они нужны!'.format(i + FIRST_ROW, orig_id))
+            sys.exit()
+        if dig_id in ids:
+            lg.error('В строках {} и {} находятся «одинаковые» ID {} и {}. Правые 4 цифры должны быть уникальны'.format(
+                ids[dig_id] + FIRST_ROW, i + FIRST_ROW, res[ids[dig_id]]['ID'], orig_id))
+            sys.exit()
+        ids[dig_id] = i
+        res[i]['IDd'] = dig_id.zfill(4)
+
+
 def parse_xls_conduit(fn):
     """Вычитывает данные из кондуита. Возвращает список постолцовых словарей"""
     lg.info('Открываем файл (займёт время) ' + fn)
@@ -112,6 +132,7 @@ def parse_xls_conduit(fn):
             #    d_row['Класс'] =
             res.append(d_row)
     lg.info('Файл вычитан ' + fn)
+    check_ids_unique(res)
     return res
 
 
@@ -136,3 +157,14 @@ def update_stats(stats):
     pickle_dump_path = os.path.join(DUMMY_FOLDER_PATH, 'zstats.pickle')
     with open(pickle_dump_path, 'wb') as f:
         pickle.dump(stats, file=f)
+
+
+def crt_aud_barcode(aud, ids):
+    ELEM_LEN = 4
+    data_d = [id.zfill(ELEM_LEN)[-ELEM_LEN:] for id in ids]
+    to_save_s = str(aud).zfill(ELEM_LEN) + ''.join(data_d)
+    to_save_b = to_save_s.encode()
+    to_save_z = zlib.compress(to_save_b)
+    codes = encode(to_save_z, columns=28, security_level=5)
+    image = render_image(codes, scale=1, padding=0)
+    image.save(os.path.join(DUMMY_FOLDER_PATH, BARCODES, 'barcode_{}.png'.format(aud)))

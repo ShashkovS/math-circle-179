@@ -6,3 +6,4 @@ Scan*.pdf
 __pycache__
 cpdf.exe
 cpdfmanual.pdf
+barcodes/barcode*.png

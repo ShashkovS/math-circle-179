@@ -114,7 +114,7 @@ def refactor_tex(data):
     data = data.replace('PERSENT_W4MCFkw6VF', r'\%')
     data = data.replace('TAKEN_W4MCFkw6VF', r'%[Взято')
     data = data.replace('DOLLAR_W4MCFkw6VF', r'\$')
-    data = data.replace(r'\graphicspath{{' + PICT_DIR + '/}}', r'\graphicspath{{../' + PICT_DIR + '/}}')
+    data = data.replace(r'\graphicspath{{' + PICT_DIR + '/}}', r'\graphicspath{{../' + PICT_DIR + '/}{' + BARCODES + '/}}')
     lg.debug(('*'*100 + '\n') * 3 + 'Стало:\n' + ('*'*100 + '\n') * 3)
     lg.debug(data)
     return data

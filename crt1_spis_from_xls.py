@@ -27,34 +27,32 @@ def gen_spisok_files(res):
      \\Huge
      {}\hfill }}
     %
+    \\штрихкод={{{}}}
     \\список={{%
     """
 
     head = '\n'.join(row.strip() for row in head.splitlines())
     line = r"\start{{{}}}%" + '\n'
-    dummy_line = "\\start{\\phantom{Севастьянова Александра}}%"
+    dummy_line = '\\phantom{Севастьянова Александра}'
     bottom = """\\hline}"""
 
     auds = set((x['Аудитория'], x['Уровень']) for x in res)
     for aud, level in auds:
-        cur_names = sorted(((x['ФИО'], x['Клс'], x['Ср3']) for x in res if x['Аудитория'] == aud),
+        if level not in levels:
+            for __ in range(5): lg.error('!!! Уровень ' + level + ' не настоен в CONST (или кривой в xls)')
+            continue
+        wrk = levels[level]
+        cur_names = sorted(((x['ФИО'], x['Клс'], x['Ср3'], x['IDd']) for x in res if x['Аудитория'] == aud),
                            key=lambda x: x[0].lower().replace('ё', 'е'))
-        cur_names.append(('\\phantom{Севастьянова Александра}', '', ''))
-        #   cur_names.append('\\phantom{Цой Виктор}')
-        #  cur_names.append('\\phantom{Кинчев Константин}')
-        # cur_names.append('\\phantom{Шклярский Эдмунд}')
-        if level == 'н':
-            cur_names += [('', '', '')] * (36 - len(cur_names))
-        else:
-            cur_names += [('', '', '')] * (27 - len(cur_names))
-        # cur_names += [''] * 5
-        text = head.format(aud)
+        crt_aud_barcode(aud, [row[-1] for row in cur_names])
+        cur_names.append((dummy_line, '', '', ''))
+        cur_names += [('', '', '', '')] * (wrk['lines_in_counduit'] - len(cur_names))
+        text = head.format(aud, 'barcode_{}.png'.format(aud))
         cur_row = 0
-        for i, (name, klass, sr) in enumerate(cur_names):
+        for i, (name, klass, sr, idd) in enumerate(cur_names):
             if klass != '':
                 klass = '\\Ovalbox{' + klass + '}'
             if sr != '':
-                #  lg.info(sr)
                 sr = '\\Ovalbox{' + str(sr)[:4] + '}'
             text += line.format(name + ' ' + klass)
             cur_row += 1
@@ -63,65 +61,7 @@ def gen_spisok_files(res):
             elif i != len(cur_names) - 1 and cur_row % 3 == 0:
                 text += '\\hline\n'
         text += bottom
-        for wrk in work:
-            if level in wrk['other_excel_level_const']:
-                filename = os.path.join(DUMMY_FOLDER_PATH, wrk['spisok_name_template'].format(aud=aud))
-                barfilename = os.path.join(DUMMY_FOLDER_PATH, aud + ".tex")
-                break
-        else:
-            for __ in range(5): lg.error('!!! Уровень ' + level + ' не настоен в CONST (или кривой в xls)')
-            continue
-
-        lg.info('Создаём ' + filename)
-        with open(filename, 'w', encoding='windows-1251') as f:
-            f.write(text.replace('ё', 'е'))
-
-
-def gen_pred_spisok_files(res):
-    """Создаём поаудиторные файлы вида spisok..."""
-    lg.info('Создаём файлы spisok... для кондуитов')
-    head = """\
-    %\\downlegendfalse %нумерация задач снизу  будет отсутствовать
-    %
-    \\пометка={{\\qquad {{\\it Домашние задачи}}\\hfill% 
-     {}\hfill }}%
-    \\список={{%
-    """
-
-    head = '\n'.join(row.strip() for row in head.splitlines())
-    line = r"\start{{{}}}%" + '\n'
-    dummy_line = "\\start{\\phantom{Севастьянова Александра}}%"
-    bottom = """\\hline}"""
-
-    auds = set((x['Аудитория'], x['Уровень']) for x in res)
-    for aud, level in auds:
-        cur_names = sorted(((x['ФИО'], x['Клс'], x['Ср3']) for x in res if x['Аудитория'] == aud),
-                           key=lambda x: x[0].lower().replace('ё', 'е'))
-        cur_names.append(('\\phantom{Севастьянова Александра}', '', ''))
-        if level == 'н':
-            cur_names += [('', '', '')] * (36 - len(cur_names))
-        else:
-            cur_names += [('', '', '')] * (27 - len(cur_names))
-        # cur_names += [''] * 5
-        text = head.format(aud)
-        cur_row = 0
-        for i, (name, klass, sr) in enumerate(cur_names):
-            text += line.format(name)
-            cur_row += 1
-            if i != len(cur_names) - 1 and cur_row % 9 == 0 and cur_row < 20:
-                text += '\\midlegend\n'
-            elif i != len(cur_names) - 1 and cur_row % 3 == 0:
-                text += '\\hline\n'
-        text += bottom
-        for wrk in work:
-            if level in wrk['other_excel_level_const']:
-                filename = os.path.join(DUMMY_FOLDER_PATH, wrk['pred_spisok_name_template'].format(aud=aud))
-                barfilename = os.path.join(DUMMY_FOLDER_PATH, aud + ".tex")
-                break
-        else:
-            for __ in range(5): lg.error('!!! Уровень ' + level + ' не настоен в CONST (или кривой в xls)')
-            continue
-
+        filename = os.path.join(DUMMY_FOLDER_PATH, wrk['spisok_name_template'].format(aud=aud))
         lg.info('Создаём ' + filename)
         with open(filename, 'w', encoding='windows-1251') as f:
             f.write(text.replace('ё', 'е'))
@@ -131,45 +71,45 @@ def gen_aud_lists(res):
     """Создаём поаудиторный список"""
     lg.info('Создаём поаудиторные списки на двери...')
     head = r"""
-    \documentclass[14pt]{article}
-    \usepackage[cp1251]{inputenc}
-    \usepackage[russian]{babel}
-    \usepackage{graphics}
-    \usepackage[table]{xcolor}
-    \usepackage[margin=1truecm]{geometry}
-    \pagestyle{empty}
-    
-    \begin{document}
+\documentclass[14pt]{article}
+\usepackage[cp1251]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{graphics}
+\usepackage[table]{xcolor}
+\usepackage[margin=1truecm]{geometry}
+\pagestyle{empty}
+
+\begin{document}
     """
 
     table_head = r"""
-    \begin{center}
-    \scalebox{3}{\Huge{ВМШ ???}}
-    \par
-    \vspace{1cm}
-    \fontsize{16}{22}\selectfont
-    \rowcolors{2}{gray!15}{white}
-    \begin{tabular}{|c|}\hline
-    \rowcolor{gray!50}\textbf{\hspace*{2cm}Фамилия и имя\hspace*{2cm}}\\\hline
+\begin{center}
+\scalebox{3}{\Huge{ВМШ ???}}
+\par
+\vspace{1cm}
+\fontsize{16}{22}\selectfont
+\rowcolors{2}{gray!15}{white}
+\begin{tabular}{|c|}\hline
+\rowcolor{gray!50}\textbf{\hspace*{2cm}Фамилия и имя\hspace*{2cm}}\\\hline
     """
 
     table_row = '{} \\\\\\hline\n'
 
     table_bottom = r"""
-    \end{tabular}
-    
-    \vfill
-    \Huge{Распределение по аудиториям можно найти в~списках при входе на этаж}
-    \end{center}
+\end{tabular}
+
+\vfill
+\Huge{Распределение по аудиториям можно найти в~списках при входе на этаж}
+\end{center}
     """
 
     table_short = r"""
-    \end{tabular}
-    \end{center}
+\end{tabular}
+\end{center}
     """
 
     bottom = r"""
-    \end{document}
+\end{document}
     """
 
     auds = set((x['Аудитория']) for x in res)
@@ -302,7 +242,6 @@ def gen_mega_floor_lists(res):
         text = text.replace(r'\usepackage[a3paper,margin=.7truecm]{geometry}',
                             r'\usepackage[a4paper,margin=.7truecm,landscape]{geometry}')
 
-
     filename = DUMMY_FOLDER_PATH + 'Распределение по аудиториям.tex'
     lg.info('Создаём ' + filename)
     with open(filename, 'w', encoding='windows-1251') as f:
@@ -318,13 +257,10 @@ def compile_and_copy():
     copyfile(os.path.join(DUMMY_FOLDER_PATH, 'Распределение по аудиториям.pdf'),
              os.path.join(PRINT_PDFS_PATH, '_Распределение по аудиториям.pdf'))
     # Удаляем треш
-    for name in os.listdir(DUMMY_FOLDER_PATH):
-        if '.' in name and name.lower()[name.rfind('.') + 1:] in ('bak', 'aux', 'bbl', 'blg', 'log', 'synctex'):
-            os.remove(os.path.join(DUMMY_FOLDER_PATH, name))
-    # Удаляем треш
-    for name in os.listdir(START_PATH):
-        if '.' in name and name.lower()[name.rfind('.') + 1:] in ('bak', 'aux', 'bbl', 'blg', 'log', 'synctex'):
-            os.remove(os.path.join(START_PATH, name))
+    for path in DUMMY_FOLDER_PATH, START_PATH:
+        for name in os.listdir(path):
+            if '.' in name and name.lower()[name.rfind('.') + 1:] in ('bak', 'aux', 'bbl', 'blg', 'log', 'synctex'):
+                os.remove(os.path.join(path, name))
 
 
 def upd_stats(pup_lst):
@@ -348,10 +284,3 @@ gen_spisok_files(pup_lst)
 gen_aud_lists(pup_lst)
 gen_mega_floor_lists(pup_lst)
 compile_and_copy()
-
-#####АЮ#####
-# prev_pup_lst = parse_xls_conduit(XLS_PREV_CONDUIT_NAME_TEMPLATE)
-# prev_pup_lst = [pup for pup in prev_pup_lst if pup['Скрыть'] in (None, 0, '0', '', 0.0, '0.0') and pup['Аудитория'] and pup['Уровень']]
-# lg.debug(prev_pup_lst)
-# upd_stats(prev_pup_lst)
-# gen_pred_spisok_files(prev_pup_lst)
