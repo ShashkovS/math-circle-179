@@ -83,8 +83,7 @@ def gen_aud_lists(res):
     """
 
     table_head = r"""
-\begin{center}
-\scalebox{3}{\Huge{ВМШ ???}}
+\begin{center}""" + AUD_LIST_TITLE_TEX + r"""
 \par
 \vspace{1cm}
 \fontsize{16}{22}\selectfont
@@ -117,7 +116,7 @@ def gen_aud_lists(res):
     for aud in sorted(auds):
         cur_names = sorted((x['ФИО'] for x in res if x['Аудитория'] == aud and 'phantom' not in x['ФИО']),
                            key=lambda x: x.lower().replace('ё', 'е'))
-        cur_head = table_head.replace('???', aud)
+        cur_head = table_head.replace('AUD_NUMBER', aud).replace('LES_DATE', LES_DATE)
         if len(cur_names) >= 38:
             cur_head = cur_head.replace(r'\fontsize{16}{22}', r'\fontsize{14}{15}')
         elif len(cur_names) >= 33:
@@ -158,10 +157,10 @@ def gen_mega_floor_lists(res):
 \begin{document}"""
     page_head = r"""%
 \begin{center}
-\scalebox{1.5}{\Huge{\textbf{CIRCLE_TITLE}}}
+\scalebox{1.2}{\Huge{\textbf{CIRCLE_TITLE}}}
 \end{center}
 \fontsize{12}{13.6}\selectfont
-\rowcolors{2}{gray!15}{white}""".replace('CIRCLE_TITLE', CIRCLE_TITLE)
+\rowcolors{2}{gray!15}{white}""".replace('CIRCLE_TITLE', CIRCLE_TITLE.replace('LES_DATE', LES_DATE))
     table_head = r"""%
 \hfil
 \begin{tabular}[t]{|l|c|}\hline

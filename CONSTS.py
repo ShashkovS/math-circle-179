@@ -2,10 +2,16 @@ from CREDENTIALS import *
 import os
 
 # Текущее занятие
-cur_les = 1
+cur_les = 2
 prev_les = cur_les - 1
+LES_DATE = '10 сентября'
 
-CIRCLE_TITLE = "Математический кружок для 5-6 классов"
+CIRCLE_TITLE = "Математический кружок для 5-6 классов, LES_DATE"
+AUD_LIST_TITLE_TEX = r"""
+\scalebox{1.4}{\Huge{ВМШ 5-6 }}\hfill
+\scalebox{3}{\Huge{AUD_NUMBER}}\hfill
+\scalebox{1.4}{\Huge{LES_DATE}}
+"""
 
 # FIRST_TIME_FLOOR, FIRST_TIME_AUD = 'второй этаж', '201'
 FIRST_TIME_FLOOR, FIRST_TIME_AUD = None, None  # Пока не печатаем
