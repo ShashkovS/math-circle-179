@@ -1,4 +1,3 @@
-python-Levenshtein
 pillow
 PyPDF2
 PyQt5

@@ -98,20 +98,38 @@ def cond_color(val):
 
 def check_ids_unique(res):
     lg.info('Проверяем уникальность ID')
-    print(res)
     ids = {}
+    error_found = False
     for i, row in enumerate(res):
         orig_id = str(row['ID'])
         dig_id = re.sub(r'[^0-9]', '', orig_id)[-4:].lstrip('0')
         if not dig_id:
             lg.error('В строке {} находится ID школьника {}, в котором нет ненулевых цифр. Они нужны!'.format(i + FIRST_ROW, orig_id))
-            sys.exit()
+            error_found = True
         if dig_id in ids:
             lg.error('В строках {} и {} находятся «одинаковые» ID {} и {}. Правые 4 цифры должны быть уникальны'.format(
                 ids[dig_id] + FIRST_ROW, i + FIRST_ROW, res[ids[dig_id]]['ID'], orig_id))
-            sys.exit()
+            error_found = True
         ids[dig_id] = i
         res[i]['IDd'] = dig_id.zfill(4)
+    return error_found
+
+
+def check_no_level_intersection(res):
+    aud_types = {}
+    error_found = False
+    for i, row in enumerate(res):
+        id, level, aud = row['ID'], row['Уровень'], row['Аудитория']
+        level_name = levels[level]['name']
+        if aud not in aud_types:
+            aud_types[aud] = (i, id, level)
+        else:
+            old_i, old_id, old_level = aud_types[aud]
+            if old_level != level:
+                lg.error('В строках {} и {} находятся школьники с разным уровнем, но в одной и той же аудитории {}. '
+                         'ID школьников {} и {}'.format(old_i + FIRST_ROW, i + FIRST_ROW, aud, old_id, id))
+                error_found = True
+    return error_found
 
 
 def parse_xls_conduit(fn):
@@ -132,7 +150,12 @@ def parse_xls_conduit(fn):
             #    d_row['Класс'] =
             res.append(d_row)
     lg.info('Файл вычитан ' + fn)
-    check_ids_unique(res)
+    err1 = check_ids_unique(res)
+    err2 = check_no_level_intersection(res)
+    if err1 or err2:
+        choice = input('В кондуите есть критические ошибки. Введите "отстрелим-ноги", чтобы продолжить')
+        if choice != 'отстрелим-ноги':
+            sys.exit()
     return res
 
 

@@ -27,7 +27,7 @@ def crt_big_counduits(wrk, r_in_pdf_conduit, r_prev_name_conduit):
     # Кондуиты в аудитории
     # Берём со второго по предпоследний лист из cur_name_conduit,
     # каждой второй страницей берём последний лист prev_name_conduit
-    filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "3_кондуиты_в_аудитории_" + ("(2стороны!)" if r_prev_name_conduit else "") + '.pdf')
+    filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "3_aud_conds_" + ("(2side!)" if r_prev_name_conduit else "") + '.pdf')
     lg.info(filename + '...')
     filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix'] + 'bigcond' + '.pdf')
     lg.info(filename + '...')
@@ -48,7 +48,7 @@ def crt_big_counduits_new(wrk, r_in_pdf_conduit, r_prev_in_pdf_conduit):
     # Кондуиты в аудитории
     # Берём со второго по предпоследний лист из cur_name_conduit,
     # каждой второй страницей берём последний лист prev_name_conduit
-    filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "3_кондуиты_в_аудитории_" + ("(2стороны!)" if r_prev_name_conduit else "") + '.pdf')
+    filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "3_aud_conds_" + ("(2side!)" if r_prev_name_conduit else "") + '.pdf')
     lg.info(filename + '...')
     filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix'] + 'bigcond' + '.pdf')
     lg.info(filename + '...')
@@ -62,9 +62,9 @@ def crt_big_counduits_new(wrk, r_in_pdf_conduit, r_prev_in_pdf_conduit):
         output.write(f)
 
 def crt_teacher_texts_ans_counduits(wrk, r_in_pdf_conduit, r_in_pdf_teacher):
-    filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "4_преподавателям_условия_и_кондуиты_(2стороны!)_("
+    filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "4_teacher_task_and_cond_(2side!)_("
                                              + str(wrk['teacher_conduit_copies_per_aud'])
-                                             + ' копии).pdf')
+                                             + ' copies).pdf')
     filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix'] + 'smallcond.pdf')
     lg.info(filename + '...')
     output = PdfFileWriter()
@@ -104,7 +104,7 @@ def crt_current_lesson_pdf(wrk, r_in_pdf):
         lg.error('Почему-то в условиях слишком много листов формата A5')
     both_sides = types.count('A5') > 1
 
-    # if ADD_REG_INFO_TO_PRT_PDFS and r_in_pdf_pages <= 2:  # Если страниц 3, то основное условие на двух сторонах
+    # if ADD_REG_INFO_TO_PRT_PDFS and r_in_pdf_pages <= 2:  # Если страниц 3, то основное условие на двух sideх
     #     try:
     #         reg_page = PdfFileReader(open(os.path.join(PRINT_PDFS_PATH, 'Разное', "Регистрация_на_кружок.pdf"), "rb")).getPage(0)
     #         both_sides = True
@@ -119,12 +119,12 @@ def crt_current_lesson_pdf(wrk, r_in_pdf):
         num_auds = len(stats[cur_les][lvl]['Аудитории'])
         cpy_per_aud = wrk['main_problems_copies_per_aud']
         num_copies = (num_auds * cpy_per_aud + 1) // 2
-        copys_string = f'_({num_copies} коп. (по {cpy_per_aud} в ауд.))'
+        copys_string = f'_({num_copies} copies ({cpy_per_aud} per aud.))'
     except:
         copys_string = ''
     filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix']
-                                             + "1_условия"
-                                             + ("(2стороны!)" if both_sides else "")
+                                             + "1_tasks_"
+                                             + ("(2side!)" if both_sides else "")
                                              + copys_string
                                              + '.pdf')
     filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix']
@@ -191,11 +191,11 @@ def crt_addit_lesson_pdf(wrk, r_in_pdf):
         cpy_per_aud = wrk['addit_problems_copies_per_aud']
         copies_per_page = stats[cur_les][lvl]['кол-во копий доп.задач']
         num_copies = (num_auds * cpy_per_aud + copies_per_page - 1) // copies_per_page
-        copys_string = f'_({num_copies} коп. (по {cpy_per_aud} в ауд.))'
+        copys_string = f'_({num_copies} copies. ({cpy_per_aud} per aud))'
     except:
         copys_string = ''
-    filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "2_дополнительные_задачи"
-                            + ("(2стороны!)" if both_sides else "") + copys_string + '.pdf')
+    filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "2_add_comp_tasks_"
+                            + ("(2side!)" if both_sides else "") + copys_string + '.pdf')
     filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix'] + 'usldop.pdf')
     lg.info(filename + '...')
     output = PdfFileWriter()

@@ -45,6 +45,7 @@ COLUMNS = {k: ord(v) - ord('A') for (k, v) in COLUMNS.items()}
 
 # Настройки префиксов-суффиксов
 bas = {
+    'name': 'Начинающие',
     'tex_name_template': 'usl-{cur_les:02}-n.tex',
     'prev_tex_name_template': 'usl-{prev_les:02}-n.tex',
     'sol_tex_name_template': 'usl-{cur_les:02}-n-sol.tex',
@@ -52,7 +53,7 @@ bas = {
     'dummy_tex_conduit_template': '{cur_les:02}-conduit-n.tex',
     'dummy_tex_prev_conduit_template': '{cur_les:02}-prev_conduit-n.tex',
     'dummy_tex_teacher_template': '{cur_les:02}-teacher-n.tex',
-    'prt_pdf_prefix': 'Баз_',
+    'prt_pdf_prefix': 'Bas_',
     'prt_en_pdf_prefix': 'n',
     'htmls_path': r'Сайт/Сайт_Баз',
     'htmls_pdfs_template': r'{cur_les:02}-n-lesson.pdf',
@@ -74,6 +75,7 @@ bas = {
 }
 
 pro = {
+    'name': 'Продолжающие',
     'tex_name_template': 'usl-{cur_les:02}-p.tex',
     'prev_tex_name_template': 'usl-{prev_les:02}-p.tex',
     'sol_tex_name_template': 'usl-{cur_les:02}-p-sol.tex',
@@ -81,7 +83,7 @@ pro = {
     'dummy_tex_conduit_template': '{cur_les:02}-conduit-p.tex',
     'dummy_tex_prev_conduit_template': '{cur_les:02}-prev_conduit-p.tex',
     'dummy_tex_teacher_template': '{cur_les:02}-teacher-p.tex',
-    'prt_pdf_prefix': 'Про_',
+    'prt_pdf_prefix': 'Pro_',
     'prt_en_pdf_prefix': 'p',
     'htmls_path': r'Сайт/Сайт_Про',
     'htmls_pdfs_template': r'{cur_les:02}-p-lesson.pdf',

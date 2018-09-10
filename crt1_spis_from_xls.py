@@ -252,9 +252,9 @@ def compile_and_copy():
     compile_tex('Поаудиторные списки.tex', DUMMY_FOLDER_PATH)
 
     copyfile(os.path.join(DUMMY_FOLDER_PATH, 'Поаудиторные списки.pdf'),
-             os.path.join(PRINT_PDFS_PATH, '_Поаудиторные списки.pdf'))
+             os.path.join(PRINT_PDFS_PATH, '_Per aud. lists.pdf'))
     copyfile(os.path.join(DUMMY_FOLDER_PATH, 'Распределение по аудиториям.pdf'),
-             os.path.join(PRINT_PDFS_PATH, '_Распределение по аудиториям.pdf'))
+             os.path.join(PRINT_PDFS_PATH, '_Total aud. distribution.pdf'))
     # Удаляем треш
     for path in DUMMY_FOLDER_PATH, START_PATH:
         for name in os.listdir(path):
