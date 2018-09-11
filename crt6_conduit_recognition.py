@@ -58,7 +58,7 @@ def fill_xls_header(sheet, stats):
 
 def join_recognized_and_xlsx(recognized_pages, xlsx_data, stats):
     auds = sorted({x['Аудитория'] for x in xlsx_data if '100' <= x['Аудитория'] <= '999'})
-    with open('results.csv', 'w') as f:
+    with open(os.path.join(START_PATH, 'results.csv'), 'w') as f:
         for page, aud in zip(recognized_pages, sorted(auds)):
             f.write('vvvvvvvvvvvvvvv {}\n'.format(aud))
             for row in page:
@@ -162,20 +162,26 @@ def join_recognized_and_xlsx(recognized_pages, xlsx_data, stats):
             for clmn, res in enumerate(item['Результат']):
                 if res:
                     sheet.write(rown, clmn + col_mov + 4, 1)
-    workbook.save('results.xls')
+    save_dest = os.path.join(START_PATH, 'results.xls')
+    lg.info('Сохраняем результат в ' + save_dest)
+    workbook.save(save_dest)
 
 
 
 if __name__ == '__main__':
-    # os.chdir(r"Py_VMSH_2017")
     stt = time()
     recognized_pages = prc_list_of_files(PDF_FILENAME, black_threshold=240,
                                          unmark_useless_cells_func=unmark_useless_cells,
                                          remove_useless_cells_func=remove_useless_cells)
+    import pickle
+    with open('recognized.pickle', 'wb') as f:
+        pickle.dump(recognized_pages, file=f)
     print('Done in ', time() - stt)
+    # with open('recognized.pickle', 'rb') as f:
+    #     recognized_pages = pickle.load(file=f)
+
     os.chdir(r"..")
     xlsx_data = parse_xls_conduit(XLS_CONDUIT_NAME_TEMPLATE)
 
     stats = read_stats()
-    # os.chdir(r"Py_VMSH_2017")
     join_recognized_and_xlsx(recognized_pages, xlsx_data, stats)

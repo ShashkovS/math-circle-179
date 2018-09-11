@@ -8,3 +8,4 @@ cpdf.exe
 cpdfmanual.pdf
 barcodes/barcode*.png
 venv
+*.pickle

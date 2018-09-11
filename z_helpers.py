@@ -3,13 +3,13 @@ import xlrd
 import pickle
 from collections import defaultdict
 from functools import lru_cache
-from pdf417gen import encode, render_image
 from CONSTS import *
 from BIN_PATH import *
 import logging
 import re
 import sys
 import zlib
+
 logging.basicConfig(level=logging.INFO)
 lg = logging.getLogger('ВМШ')
 
@@ -104,7 +104,9 @@ def check_ids_unique(res):
         orig_id = str(row['ID'])
         dig_id = re.sub(r'[^0-9]', '', orig_id)[-4:].lstrip('0')
         if not dig_id:
-            lg.error('В строке {} находится ID школьника {}, в котором нет ненулевых цифр. Они нужны!'.format(i + FIRST_ROW, orig_id))
+            lg.error(
+                'В строке {} находится ID школьника {}, в котором нет ненулевых цифр. Они нужны!'.format(i + FIRST_ROW,
+                                                                                                         orig_id))
             error_found = True
         if dig_id in ids:
             lg.error('В строках {} и {} находятся «одинаковые» ID {} и {}. Правые 4 цифры должны быть уникальны'.format(
@@ -153,8 +155,8 @@ def parse_xls_conduit(fn):
     err1 = check_ids_unique(res)
     err2 = check_no_level_intersection(res)
     if err1 or err2:
-        choice = input('В кондуите есть критические ошибки. Введите "отстрелим-ноги", чтобы продолжить')
-        if choice != 'отстрелим-ноги':
+        choice = input('\n\nВ кондуите есть критические ошибки. Введите "отстрелим-ноги", чтобы продолжить\n\n\n')
+        if choice.strip().lower() != 'отстрелим-ноги':
             sys.exit()
     return res
 
@@ -183,10 +185,15 @@ def update_stats(stats):
 
 
 def crt_aud_barcode(aud, ids):
+    from pdf417gen import encode, render_image
     ELEM_LEN = 4
+    assert ELEM_LEN == 4  # Иначе переделывать нужно
+    HASH_CONST = [197, 3, 150, 172]
     data_d = [id.zfill(ELEM_LEN)[-ELEM_LEN:] for id in ids]
     to_save_s = str(aud).zfill(ELEM_LEN) + ''.join(data_d)
     to_save_b = to_save_s.encode()
+    control_summ_b = bytes([sum([x * HASH_CONST[i] % 256 for x in to_save_b[i::4]]) % 256 for i in range(4)])
+    to_save_b += control_summ_b
     to_save_z = zlib.compress(to_save_b)
     codes = encode(to_save_z, columns=28, security_level=5)
     image = render_image(codes, scale=1, padding=0)
