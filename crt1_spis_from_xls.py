@@ -248,8 +248,8 @@ pup_lst = [pup for pup in pup_lst if
 lg.debug(pup_lst)
 upd_stats(pup_lst)
 
-# remove_old_spis()
-# gen_spisok_files(pup_lst)
+remove_old_spis()
+gen_spisok_files(pup_lst)
 gen_aud_lists(pup_lst)
-# gen_mega_floor_lists(pup_lst)
-# compile_and_copy()
+gen_mega_floor_lists(pup_lst)
+compile_and_copy()
