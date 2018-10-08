@@ -70,70 +70,39 @@ def gen_spisok_files(res):
 def gen_aud_lists(res):
     """Создаём поаудиторный список"""
     lg.info('Создаём поаудиторные списки на двери...')
-    head = r"""
-\documentclass[14pt]{article}
-\usepackage[cp1251]{inputenc}
-\usepackage[russian]{babel}
-\usepackage{graphics}
-\usepackage[table]{xcolor}
-\usepackage[margin=1truecm]{geometry}
-\pagestyle{empty}
-
-\begin{document}
-    """
-
-    table_head = r"""
-\begin{center}""" + AUD_LIST_TITLE_TEX + r"""
-\par
-\vspace{1cm}
-\fontsize{16}{22}\selectfont
-\rowcolors{2}{gray!15}{white}
-\begin{tabular}{|c|}\hline
-\rowcolor{gray!50}\textbf{\hspace*{2cm}Фамилия и имя\hspace*{2cm}}\\\hline
-    """
-
-    table_row = '{} \\\\\\hline\n'
-
-    table_bottom = r"""
-\end{tabular}
-
-\vfill
-\Huge{Распределение по аудиториям можно найти в~списках при входе на этаж}
-\end{center}
-    """
-
-    table_short = r"""
-\end{tabular}
-\end{center}
-    """
-
-    bottom = r"""
-\end{document}
-    """
-
+    per_aud_template = parse_tex_template(r'Py_VMSH_2018\tex_templates\per_aud_lists.tex')
+    tex = []
+    tex.append(per_aud_template['tex_head'].format())
     auds = set((x['Аудитория']) for x in res)
-    text = head
     for aud in sorted(auds):
         cur_names = sorted((x['ФИО'] for x in res if x['Аудитория'] == aud and 'phantom' not in x['ФИО']),
                            key=lambda x: x.lower().replace('ё', 'е'))
-        cur_head = table_head.replace('AUD_NUMBER', aud).replace('LES_DATE', LES_DATE)
-        if len(cur_names) >= 38:
-            cur_head = cur_head.replace(r'\fontsize{16}{22}', r'\fontsize{14}{15}')
-        elif len(cur_names) >= 33:
-            cur_head = cur_head.replace(r'\fontsize{16}{22}', r'\fontsize{16}{17}')
-        elif len(cur_names) >= 30:
-            cur_head = cur_head.replace(r'\fontsize{16}{22}', r'\fontsize{16}{19}')
-        elif len(cur_names) >= 27:
-            cur_head = cur_head.replace(r'\fontsize{16}{22}', r'\fontsize{16}{21}')
-        text += cur_head
-        for i, name in enumerate(cur_names):
-            text += table_row.format(name)
-        if len(cur_names) >= 27:
-            text += table_short
-        else:
-            text += table_bottom
-        text += '\\newpage'
-    text += bottom
+        # От 1 до 23 лезет с макс. щрифтом
+        # от 24 до 46 лезет в две колонки
+        # больше 46 — убираем кусок снизу
+        # от 47 до 54 снова нормально лезет в две колонки
+        # Ещё можно менять шрифт:
+        # 28..29 \fontsize{16}{21}
+        # 30..32 \fontsize{16}{19}
+        # 33..37 \fontsize{16}{17}
+        # 38..   \fontsize{14}{15}
+        print_bottom = len(cur_names) <= 46
+        max_in_col = 23 if print_bottom else 27
+        num_cols = (len(cur_names) + max_in_col - 1) // max_in_col
+        num_pages =(num_cols + 1) // 2
+        for page in range(num_pages):
+            tex.append(per_aud_template['page_head'].format(CourseName=CIRCLE_TITLE_SHORT,
+                                                            Aud=aud,
+                                                            LesDate=LES_DATE))
+            for col in range(page*2, min((page+1)*2, num_cols)):
+                tex.append(per_aud_template['table_head'].format())
+                for row in range(col*max_in_col, min((col+1)*max_in_col, len(cur_names))):
+                    tex.append(per_aud_template['table_row'].format(RowPupilName=cur_names[row]))
+                tex.append(per_aud_template['table_bottom'].format())
+            if print_bottom:
+                tex.append(per_aud_template['page_bottom_long'].format())
+    tex.append(per_aud_template['tex_bottom'].format())
+    text = ''.join(tex)
     filename = DUMMY_FOLDER_PATH + 'Поаудиторные списки.tex'
     lg.info('Создаём ' + filename)
     with open(filename, 'w', encoding='windows-1251') as f:
@@ -188,6 +157,9 @@ def gen_mega_floor_lists(res):
     pup_list = sorted([(x['ФИО'] if len(x['ФИО']) <= 20 else x['ФИ.'],
                         x['Аудитория']) for x in res if 'phantom' not in x['ФИО']],
                       key=lambda x: x[0].lower().replace('ё', 'е'))
+    for i, (pup, aud) in enumerate(pup_list):
+        if str(aud).strip() in AUD_LIST_REPLACERS:
+            pup_list[i] = (pup, AUD_LIST_REPLACERS[str(aud).strip()])
     # Если фамилий большей 348, то добавляем строчки с буквами (всё равно на одну страницу не лезет)
     if len(pup_list) > 348:
         first_letters = {(x[0][0].upper(), '') for x in pup_list}
@@ -278,8 +250,8 @@ pup_lst = [pup for pup in pup_lst if
 lg.debug(pup_lst)
 upd_stats(pup_lst)
 
-remove_old_spis()
-gen_spisok_files(pup_lst)
+# remove_old_spis()
+# gen_spisok_files(pup_lst)
 gen_aud_lists(pup_lst)
-gen_mega_floor_lists(pup_lst)
-compile_and_copy()
+# gen_mega_floor_lists(pup_lst)
+# compile_and_copy()

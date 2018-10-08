@@ -2,16 +2,19 @@ from CREDENTIALS import *
 import os
 
 # Текущее занятие
-cur_les = 2
+cur_les = 6
 prev_les = cur_les - 1
-LES_DATE = '10 сентября'
+LES_DATE = '8 октября'
+
+AUD_LIST_REPLACERS = {
+    '415': '405',
+    '425': '405',
+    '435': '405',
+    '445': '405',
+}
 
 CIRCLE_TITLE = "Математический кружок для 5-6 классов, LES_DATE"
-AUD_LIST_TITLE_TEX = r"""
-\scalebox{1.4}{\Huge{ВМШ 5-6 }}\hfill
-\scalebox{3}{\Huge{AUD_NUMBER}}\hfill
-\scalebox{1.4}{\Huge{LES_DATE}}
-"""
+CIRCLE_TITLE_SHORT = 'ВМШ 5-6'
 
 # FIRST_TIME_FLOOR, FIRST_TIME_AUD = 'второй этаж', '201'
 FIRST_TIME_FLOOR, FIRST_TIME_AUD = None, None  # Пока не печатаем
@@ -65,9 +68,9 @@ bas = {
     'excel_column_shift': 0,
     'spisok_name_template': 'spisok-n-{aud}.tex',
     'pred_spisok_name_template': 'pred_spisok-n-{aud}.tex',
-    'main_problems_copies_per_aud': 22,
-    'addit_problems_copies_per_aud': 20,
-    'teacher_conduit_copies_per_aud': 6,
+    'main_problems_copies_per_aud': 18,
+    'addit_problems_copies_per_aud': 10,
+    'teacher_conduit_copies_per_aud': 4,
     'lines_in_counduit': 27,
     'short_eng_level': 'n',
     'json_db_api_url': 'https://www.shashkovs.ru/vmsh/conduit/ajax/ParseJSON.php',

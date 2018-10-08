@@ -1,0 +1,50 @@
+%block tex_head
+\documentclass[14pt]{article}
+\usepackage[cp1251]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{graphics}
+\usepackage[table]{xcolor}
+\usepackage[margin=1truecm]{geometry}
+\pagestyle{empty}
+\begin{document}
+%block tex_head
+
+%block page_head
+\newpage
+\begin{center}
+\scalebox{1.4}{\Huge{<<CourseName>>}}\hfill
+\scalebox{3}{\Huge{<<Aud>>}}\hfill
+\scalebox{1.4}{\Huge{<<LesDate>>}}
+\vspace{1cm}
+\end{center}
+\fontsize{16}{22}\selectfont
+\rowcolors{2}{gray!15}{white}
+\par\noindent
+%block page_head
+
+%block table_head
+\hfil%
+\begin{tabular}[t]{|c|}\hline
+\rowcolor{gray!50}\textbf{\hspace*{2cm}Фамилия и имя\hspace*{2cm}}\\\hline
+%block table_head
+
+%block table_row
+<<RowPupilName>> \\\hline
+%block table_row
+
+%block table_bottom
+\end{tabular}%
+\hfil%
+%block table_bottom
+
+%block page_bottom_long
+\par%
+\vfill
+\begin{center}
+\Huge{Распределение по аудиториям можно найти в~списках при входе на этаж}
+\end{center}
+%block page_bottom_long
+
+%block tex_bottom
+\end{document}
+%block tex_bottom

@@ -121,6 +121,8 @@ def check_no_level_intersection(res):
     aud_types = {}
     error_found = False
     for i, row in enumerate(res):
+        if not row['Фамилия'] or row['Скрыть'] not in (None, 0, '0', '', 0.0, '0.0'):
+            continue
         id, level, aud = row['ID'], row['Уровень'], row['Аудитория']
         level_name = levels[level]['name']
         if aud not in aud_types:
@@ -198,3 +200,12 @@ def crt_aud_barcode(aud, ids):
     codes = encode(to_save_z, columns=28, security_level=5)
     image = render_image(codes, scale=1, padding=0)
     image.save(os.path.join(DUMMY_FOLDER_PATH, BARCODES, 'barcode_{}.png'.format(aud)))
+
+
+def parse_tex_template(path):
+    block_finder = re.compile(r'(?sm)^%block (\w+)[^\n]*\n(.*)?^%block \1[^\n]*\n')
+    with open(path, 'r', encoding='windows-1251') as f:
+        tex = f.read()
+    tex = tex.replace('{', '{{').replace('}', '}}')
+    tex = re.sub(r'<<(\w+)>>', r'{\1}', tex)
+    return dict(block_finder.findall(tex))
