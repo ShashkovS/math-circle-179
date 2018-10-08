@@ -91,9 +91,7 @@ def gen_aud_lists(res):
         num_cols = (len(cur_names) + max_in_col - 1) // max_in_col
         num_pages =(num_cols + 1) // 2
         for page in range(num_pages):
-            tex.append(per_aud_template['page_head'].format(CourseName=CIRCLE_TITLE_SHORT,
-                                                            Aud=aud,
-                                                            LesDate=LES_DATE))
+            tex.append(per_aud_template['page_head'].format(CourseName=CIRCLE_TITLE_SHORT, Aud=aud, LesDate=LES_DATE))
             for col in range(page*2, min((page+1)*2, num_cols)):
                 tex.append(per_aud_template['table_head'].format())
                 for row in range(col*max_in_col, min((col+1)*max_in_col, len(cur_names))):
