@@ -1,0 +1,66 @@
+%block tex_head
+\documentclass[14pt]{article}
+\usepackage[cp1251]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{graphics}
+\usepackage[table]{xcolor}
+\usepackage{multicol}
+\usepackage[a3paper,margin=.7truecm]{geometry}  % Эту строку без изменения функции gen_mega_floor_lists менять нельзя!
+\usepackage{longtable}
+\pagestyle{empty}
+\newsavebox\ltmcbox
+\begin{document}
+%block tex_head
+
+
+%block page_head
+\begin{center}
+\scalebox{1.2}{\Huge{\textbf{<<circleTitle>>}}}
+\end{center}
+\fontsize{12}{13.6}\selectfont  % Эту строку без изменения функции gen_mega_floor_lists менять нельзя!
+\rowcolors{2}{gray!15}{white}
+%block page_head
+
+
+%block table_head
+\hfil
+\begin{tabular}[t]{|l|c|}\hline
+\rowcolor{gray!50}\textbf{Фамилия и имя} & \textbf{Ауд}\\ \hline
+%block table_head
+
+
+%block table_row
+<<pupil>> & <<aud>> \\ \hline
+%block table_row
+
+
+%block table_bottom
+\end{tabular}\hfil
+%block table_bottom
+
+
+%block first_time
+\begin{center}
+\scalebox{1.0}{\Huge{\textbf{Пришедшие в первый раз приглашаются на <<firstTimeFloor>> в <<firstTimeAud>> ауд.}}}
+\end{center}
+%block first_time
+
+
+
+
+%block page_bottom
+
+%block page_bottom
+
+
+
+
+%block tex_bottom
+\end{document}
+%block tex_bottom
+
+
+
+
+
+

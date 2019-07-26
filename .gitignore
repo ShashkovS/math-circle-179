@@ -10,6 +10,10 @@ barcodes/barcode*.png
 venv
 *.pickle
 zbar-0.10-setup.exe
+*.synctex
+~*
+*.log
+*.bak
 
 **/z_CREDENTIALS.py
 **/results.*
@@ -23,3 +27,6 @@ zbar-0.10-setup.exe
 **/venv
 **/*.pickle
 **/zbar-0.10-setup.exe
+**/~*
+**/*.log
+**/*.bak

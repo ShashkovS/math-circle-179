@@ -37,7 +37,7 @@ def compile_tex(filename, add_path=''):
                          cwd=os.path.join(START_PATH, add_path),
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
-    output, err = p.communicate(timeout=200)
+    output, err = p.communicate(timeout=20)
 
     if b'failed' in err:
         lg.error('Не удалось скомпилировать ' + filename)
@@ -102,11 +102,11 @@ def check_ids_unique(res):
         dig_id = re.sub(r'[^0-9]', '', orig_id)[-4:].lstrip('0')
         if not dig_id:
             lg.error(
-                'В строке {} находится ID школьника {}, в котором нет ненулевых цифр. Они нужны!'.format(i + FIRST_ROW,
+                'В строке {} находится ID школьника `{}`, в котором нет ненулевых цифр. Они нужны!'.format(i + FIRST_ROW,
                                                                                                          orig_id))
             error_found = True
         if dig_id in ids:
-            lg.error('В строках {} и {} находятся «одинаковые» ID {} и {}. Правые 4 цифры должны быть уникальны'.format(
+            lg.error('В строках {} и {} находятся «одинаковые» ID `{}` и `{}`. Правые 4 цифры должны быть уникальны'.format(
                 ids[dig_id] + FIRST_ROW, i + FIRST_ROW, res[ids[dig_id]]['ID'], orig_id))
             error_found = True
         ids[dig_id] = i
@@ -154,7 +154,9 @@ def parse_xls_conduit(fn):
     err1 = check_ids_unique(res)
     err2 = check_no_level_intersection(res)
     if err1 or err2:
-        choice = input('\n\nВ кондуите есть критические ошибки. Введите "отстрелим-ноги", чтобы продолжить\n\n\n')
+        lg.error('')
+        lg.error('В кондуите есть критические ошибки. Введите "отстрелим-ноги", чтобы продолжить\n')
+        choice = input()
         if choice.strip().lower() != 'отстрелим-ноги':
             sys.exit()
     return res

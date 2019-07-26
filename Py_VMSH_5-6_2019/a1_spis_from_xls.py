@@ -15,53 +15,37 @@ def remove_old_spis():
 def gen_spisok_files(res):
     """Создаём поаудиторные файлы вида spisok..."""
     lg.info('Создаём файлы spisok... для кондуитов')
-    head = """\
-    %\\downlegendfalse %нумерация задач снизу  будет отсутствовать
-    %
-    \\пометка={{\\qquad Отметь присутствующих!\\hfill%
-     Перемена
-     с
-     17: 25
-     до
-     17: 35\\hfill
-     \\Huge
-     {}\hfill }}
-    %
-    \\штрихкод={{{}}}
-    \\список={{%
-    """
+    spisok_template = parse_tex_template(os.path.join(PY_PROJ_DIR_PATH, 'tex_templates', 'spisok_xxx.tex'))
 
-    head = '\n'.join(row.strip() for row in head.splitlines())
-    line = r"\start{{{}}}%" + '\n'
-    dummy_line = '\\phantom{Севастьянова Александра}'
-    bottom = """\\hline}"""
-
+    # Получаем множество всех аудиторий
     auds = set((x['Аудитория'], x['Уровень']) for x in res)
     for aud, level in auds:
+        # Проверяем корректность
         if level not in levels:
             for __ in range(5): lg.error('!!! Уровень ' + level + ' не настоен в CONST (или кривой в xls)')
             continue
         wrk = levels[level]
+        # Собираем всех школьников данной аудитории
         cur_names = sorted(((x['ФИО'], x['Клс'], x['Ср3'], x['IDd']) for x in res if x['Аудитория'] == aud),
                            key=lambda x: x[0].lower().replace('ё', 'е'))
+        # Генерим штрихкод с их id-шниками
         crt_aud_barcode(aud, [row[-1] for row in cur_names])
-        cur_names.append((dummy_line, '', '', ''))
+        # Добавляем спец. строчку для минимальной ширины
+        cur_names.append((spisok_template['dummy_line'].format(), '', '', ''))
+        # Добиваем строчек до нужного числа
         cur_names += [('', '', '', '')] * (wrk['lines_in_conduit'] - len(cur_names))
-       # text = head.format(aud, 'barcode_{}.png'.format(aud))
-        text = head.format(aud,'')
-        cur_row = 0
-        for i, (name, klass, sr, idd) in enumerate(cur_names):
+        text = spisok_template['tex_head'].format(aud=aud, barcode_name='barcode_{}.png'.format(aud))
+        for cur_row, (name, klass, sr, idd) in enumerate(cur_names, start=1):
             if klass != '':
                 klass = '\\Ovalbox{' + klass + '}'
             if sr != '':
                 sr = '\\Ovalbox{' + str(sr)[:4] + '}'
-            text += line.format(name + ' ' + klass)
-            cur_row += 1
-            if i != len(cur_names) - 1 and cur_row % 9 == 0 and cur_row < 20:
+            text += spisok_template['line'].format(pup_name=name + ' ' + klass)
+            if cur_row != len(cur_names) and cur_row % 9 == 0 and cur_row < 20:
                 text += '\\midlegend\n'
-            elif i != len(cur_names) - 1 and cur_row % 3 == 0:
+            elif cur_row != len(cur_names) and cur_row % 3 == 0:
                 text += '\\hline\n'
-        text += bottom
+        text += spisok_template['bottom'].format()
         filename = os.path.join(DUMMY_FOLDER_PATH, wrk['spisok_name_template'].format(aud=aud))
         lg.info('Создаём ' + filename)
         with open(filename, 'w', encoding='windows-1251') as f:
@@ -71,7 +55,7 @@ def gen_spisok_files(res):
 def gen_aud_lists(res):
     """Создаём поаудиторный список"""
     lg.info('Создаём поаудиторные списки на двери...')
-    per_aud_template = parse_tex_template(r'Py_VMSH_2018\tex_templates\per_aud_lists.tex')
+    per_aud_template = parse_tex_template(os.path.join(PY_PROJ_DIR_PATH, 'tex_templates', 'per_aud_lists.tex'))
     tex = []
     tex.append(per_aud_template['tex_head'].format())
     auds = set((x['Аудитория']) for x in res)
@@ -110,51 +94,15 @@ def gen_aud_lists(res):
 
 def gen_mega_floor_lists(res):
     # Теперь мега-список
-
-    tex_head = r"""%
-\documentclass[14pt]{article}
-\usepackage[cp1251]{inputenc}
-\usepackage[russian]{babel}
-\usepackage{graphics}
-\usepackage[table]{xcolor}
-\usepackage{multicol}
-\usepackage[a3paper,margin=.7truecm]{geometry}
-\usepackage{longtable}
-\pagestyle{empty}
-\newsavebox\ltmcbox
-\begin{document}"""
-    page_head = r"""%
-\begin{center}
-\scalebox{1.2}{\Huge{\textbf{CIRCLE_TITLE}}}
-\end{center}
-\fontsize{12}{13.6}\selectfont
-\rowcolors{2}{gray!15}{white}""".replace('CIRCLE_TITLE', CIRCLE_TITLE.replace('LES_DATE', LES_DATE))
-    table_head = r"""%
-\hfil
-\begin{tabular}[t]{|l|c|}\hline
-\rowcolor{gray!50}\textbf{Фамилия и имя} & \textbf{Ауд}\\ \hline"""
-    table_bottom = r"""%
-\end{tabular}\hfil"""
-    page_bottom = r"""%
-"""
+    floor_template = parse_tex_template(os.path.join(PY_PROJ_DIR_PATH, 'tex_templates', 'mega_floor_lists.tex'))
     if FIRST_TIME_FLOOR and FIRST_TIME_AUD:
-        first_time_text = r"""
-        \begin{center}
-        \scalebox{1.0}{\Huge{\textbf{Пришедшие в первый раз приглашаются на FIRST_TIME_FLOOR в FIRST_TIME_AUD ауд.}}}
-        \end{center}
-        """.replace('FIRST_TIME_AUD', FIRST_TIME_AUD).replace('FIRST_TIME_FLOOR', FIRST_TIME_FLOOR)
+        first_time_text = floor_template['first_time'].format(firstTimeFloor=FIRST_TIME_FLOOR, firstTimeAud=FIRST_TIME_AUD)
     else:
         first_time_text = ""
-
-    tex_bottom = r"""
-    \end{document}
-    """
-
-    # title_row = r"\rowcolor{gray!50}\textbf{Фамилия и имя} & \textbf{Ауд}\\ \hline" + '\n'
-    table_row = '{} & {} \\\\\\hline\n'
-
     pup_list = sorted([(x['ФИО'] if len(x['ФИО']) <= 20 else x['ФИ.'],
-                        x['Аудитория']) for x in res if 'phantom' not in x['ФИО']],
+                        x['Аудитория'])
+                        for x in res
+                        if 'phantom' not in x['ФИО']],
                       key=lambda x: x[0].lower().replace('ё', 'е'))
     for i, (pup, aud) in enumerate(pup_list):
         if str(aud).strip() in AUD_LIST_REPLACERS:
@@ -171,9 +119,10 @@ def gen_mega_floor_lists(res):
         fpl = (len(pup_list) + 2) // 2
         pages = [pup_list[:fpl], [(pup_list[fpl][0][0].upper(), '')] + pup_list[fpl:]]
     # Теперь генерим страницы
-    text = tex_head
+    text = floor_template['tex_head'].format()
     for pn, pup_list in enumerate(pages):
-        cur_text = (r'\newpage' if pn > 0 else '') + page_head
+        cur_text = (r'\newpage' if pn > 0 else '')
+        cur_text += floor_template['page_head'].format(circleTitle=CIRCLE_TITLE.replace('LES_DATE', LES_DATE))
         # Теперь подгоним масштаб под кол-во школьников
         if len(pup_list) <= 112:
             cur_text = cur_text.replace(r'\fontsize{12}{13.6}', r'\fontsize{13}{15}')
@@ -192,21 +141,21 @@ def gen_mega_floor_lists(res):
         elif len(pup_list) <= 348:
             cur_text = cur_text.replace(r'\fontsize{12}{13.6}', r'\fontsize{11}{12.0}')
         cur_text = [cur_text]
-        cur_text.append(table_head)
+        cur_text.append(floor_template['table_head'].format())
         rows_in_col = ((len(pup_list) + 3) // 4)
         for i, (pup, aud) in enumerate(pup_list):
             if i > 0 and i % rows_in_col == 0:
-                cur_text.append(table_bottom)
-                cur_text.append(table_head)
+                cur_text.append(floor_template['table_bottom'].format())
+                cur_text.append(floor_template['table_head'].format())
             if len(pup) == 1 and aud == '':
                 pup = r'\textbf{' + pup + '}'
                 aud = pup
-            cur_text.append(table_row.format(pup, aud))
-        cur_text.append(table_bottom)
+            cur_text.append(floor_template['table_row'].format(pupil=pup, aud=aud))
+        cur_text.append(floor_template['table_bottom'].format())
         cur_text.append(first_time_text)
-        cur_text.append(page_bottom)
+        cur_text.append(floor_template['page_bottom'].format())
         text += ''.join(cur_text)
-    text += tex_bottom
+    text += floor_template['tex_bottom'].format()
     # Если список мал, то печатаем на A4
     if len(pup_list) <= 124:
         text = text.replace(r'\usepackage[a3paper,margin=.7truecm]{geometry}',
@@ -254,3 +203,6 @@ gen_spisok_files(pup_lst)
 gen_aud_lists(pup_lst)
 gen_mega_floor_lists(pup_lst)
 compile_and_copy()
+
+lg.info("")
+lg.info("Всё готово!")

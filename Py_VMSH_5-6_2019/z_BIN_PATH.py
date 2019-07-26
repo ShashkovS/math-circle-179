@@ -1,10 +1,7 @@
 import os
 
-start_path_to_try = [
-    # Добавить сюда свой путь, если не находится автоматом
-    r'C:\Drobpox\Foo\Boo\Zoo\Py_VMSH_5-6_2019\..',
-    os.path.realpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')),
-]
+PY_PROJ_DIR_PATH = os.path.realpath(os.path.dirname(os.path.abspath(__file__)))
+START_PATH = os.path.realpath(os.path.join(PY_PROJ_DIR_PATH, '..'))
 
 texify_path_to_try = [
     os.path.expandvars(r'%LocalAppData%\Programs\MiKTeX 2.9\miktex\bin\x64\texify.exe'),
@@ -29,13 +26,6 @@ ghostscript_path_to_try = [
     r'C:\ShashkovsTeX\Full_TeX\gs\gs9.22\bin\gswin64c.exe',
 ]
 
-for path in start_path_to_try:
-    if os.path.isdir(path):
-        START_PATH = path
-        break
-else:
-    raise ValueError('Укажите правильный путь в переменной START_PATH в файле z_BIN_PATH.py')
-
 for file in texify_path_to_try:
     if os.path.isfile(file):
         TEXIFY_PATH = file
@@ -49,4 +39,3 @@ for file in ghostscript_path_to_try:
         break
 else:
     raise ValueError('Укажите правильный путь в конце списка ghostscript_path_to_try в файле z_BIN_PATH.py')
-

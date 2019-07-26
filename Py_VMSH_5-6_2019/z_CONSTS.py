@@ -2,9 +2,9 @@ from z_CREDENTIALS import *
 import os
 
 # Текущее занятие
-cur_les = 35
+cur_les = 1
 prev_les = cur_les - 1
-LES_DATE = '20 мая'
+LES_DATE = '1 тестобря'
 
 AUD_LIST_REPLACERS = {
     '415': '405',
@@ -110,6 +110,6 @@ pro = {
 }
 levels = {**dict(zip(bas['other_excel_level_const'], [bas] * 100)),
           **dict(zip(pro['other_excel_level_const'], [pro] * 100))}
-work = (bas, pro)
+work = [bas, pro]
 ADVANCED_LEVEL_CONST = pro['excel_level_const']
 PUNCTS = 'абвгдежзиклмнопрст'

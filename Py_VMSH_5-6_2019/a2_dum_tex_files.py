@@ -3,9 +3,10 @@ from z_CONSTS import *
 from z_helpers import *
 from shutil import copyfile
 import re
+from multiprocessing import Pool
 
 #work = (bas,)
-work = (pro, )
+#work = (pro, )
 
 
 for cur_les in range(1, cur_les+1):
@@ -76,6 +77,8 @@ def refactor_tex(data):
 
     if r'\begin{center}%КОММЕНТЫ В КОНЦЕ' in data:
         data = re.sub(r'(\\vfil\s*)?(\\vspace\{.*?\}\s*)?\s*\\begin\{center\}%КОММЕНТЫ В КОНЦЕ.*?\\end\{center\}', '', data, flags=re.DOTALL)
+    data = re.sub(r'\\объявление.*?\\кобъявление', r'', data, flags=re.DOTALL)
+    data = re.sub(r'\\важноеОбъявление.*?\\кважноеОбъявление', r'', data, flags=re.DOTALL)
 
     data = re.sub(r'\n\s*%.*$', r'', data, flags=re.MULTILINE)  # Удаляем комментарии
     data = re.sub(r'\s*%.*$', r'', data, flags=re.MULTILINE)  # Удаляем комментарии
@@ -114,15 +117,15 @@ def refactor_tex(data):
     data = data.replace('PERSENT_W4MCFkw6VF', r'\%')
     data = data.replace('TAKEN_W4MCFkw6VF', r'%[Взято')
     data = data.replace('DOLLAR_W4MCFkw6VF', r'\$')
-    data = data.replace(r'\graphicspath{{../' + PICT_DIR + '/}}', r'\graphicspath{{../' + PICT_DIR + '/}{' + BARCODES + '/}}')
-    lg.debug(r'\graphicspath{{' + PICT_DIR + '/}}', r'\graphicspath{{../' + PICT_DIR + '/}{' + BARCODES + '/}}')
+    data = re.sub(r'\\graphicspath{.*}\s*$', 'graphicspath', data, flags=re.MULTILINE)
+    data = data.replace('graphicspath', fr'\graphicspath{{{{../{PICT_DIR}/}}{{{BARCODES}/}}}}')
     lg.debug(('*'*100 + '\n') * 3 + 'Стало:\n' + ('*'*100 + '\n') * 3)
     lg.debug(data)
     return data
 
 
 
-def crt_lesson_tex_for_site_pdf(data, res_name, pdf_name):
+def crt_lesson_tex_for_site_pdf(data, res_name, pdf_name, htmls_path):
     # Делаем А4
     data = data.replace(r'\aaaaappage', '')
     data = re.sub(r'mag=\d{3},', r'mag=1000,', data)    # Удаляем newpage
@@ -136,7 +139,7 @@ def crt_lesson_tex_for_site_pdf(data, res_name, pdf_name):
     # Теперь компилим это
     compile_tex(res_name, DUMMY_FOLDER_PATH)
     copyfile(os.path.join(START_PATH, DUMMY_FOLDER_PATH, res_name.replace('.tex', '.pdf')),
-             os.path.join(START_PATH, wrk['htmls_path'], pdf_name))
+             os.path.join(START_PATH, htmls_path, pdf_name))
 
 
 def crt_solutions_tex(sol_data, sol_name):
@@ -319,9 +322,7 @@ def remove_trash():
                 os.remove(os.path.join(path, name))
 
 
-copyfile(os.path.join(START_PATH, 'newlistok.sty'), os.path.join(START_PATH, DUMMY_FOLDER_PATH, 'newlistok.sty'))  # Освежаем стиль на всякий случай
-
-for wrk in work:
+def do_all_wrk_stuff(wrk):
     cur_name = os.path.join(START_PATH, wrk['tex_name_template'].format(cur_les=cur_les))
     lg.info('Обрабатываем ' + cur_name)
     with open(cur_name, 'r', encoding='windows-1251') as f:
@@ -331,7 +332,11 @@ for wrk in work:
     # Делаем основное общее преобразование
     data = refactor_tex(data)
     # Файл, на основе которого готовится pdf на сайт (а также html)
-    crt_lesson_tex_for_site_pdf(data, wrk['dummy_tex_lesson_template'].format(cur_les=cur_les), wrk['htmls_pdfs_template'].format(cur_les=cur_les))
+    crt_lesson_tex_for_site_pdf(data,
+                                wrk['dummy_tex_lesson_template'].format(cur_les=cur_les),
+                                wrk['htmls_pdfs_template'].format(cur_les=cur_les),
+                                wrk['htmls_path']
+                                )
     # Файлик, в которое будем писать решения.
     crt_solutions_tex(data, wrk['sol_tex_name_template'].format(cur_les=cur_les))
     # Файлик, для поаудиторных кондуитов
@@ -350,5 +355,17 @@ for wrk in work:
     # Так, теперь самое сложное - версия для преподавателей
     crt_teacher_edition(data, wrk['dummy_tex_teacher_template'].format(cur_les=cur_les))
     # Удаляем треш
+    lg.info('*'*100 + '\nКусок готов\n' + '*'*100+'\n')
+
+
+if __name__ == '__main__':
+    copyfile(os.path.join(START_PATH, 'newlistok.sty'),
+             os.path.join(START_PATH, DUMMY_FOLDER_PATH, 'newlistok.sty'))  # Освежаем стиль на всякий случай
+    pool = Pool(processes=2)
+    # Запускаем по процессу на начинающих и продолжающих
+    result = pool.map_async(do_all_wrk_stuff, work)
+    result.get(timeout=120)
     remove_trash()
-    print('*'*100 + '\nКусок готов\n' + '*'*100)
+
+    lg.info("")
+    lg.info("Всё готово!")
