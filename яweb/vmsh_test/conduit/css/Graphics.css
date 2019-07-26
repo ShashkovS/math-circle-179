@@ -1,0 +1,16 @@
+#MainPlot 
+{
+    width:100%;
+    height:400px;
+}
+
+#legend
+{
+    margin-top:0.5em;
+}
+
+#overview
+{
+    width:100%;
+    height:70px;
+}

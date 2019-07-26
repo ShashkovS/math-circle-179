@@ -1,0 +1,13 @@
+################################
+# Настраиваем доступ по паролю #
+################################
+
+AuthType Digest
+AuthDigestQop auth
+BrowserMatch "MSIE" AuthDigestEnableQueryStringHack=On      # Защита от какой-то хрени при использовании IE 6
+AuthName "Electronic Conduit"
+AuthDigestDomain /
+AuthUserFile "/volume1/web/PublicWeb/conduit/logout/.htpasswd"
+require valid-user
+
+ErrorDocument 401 "/conduit/logout/401.html"

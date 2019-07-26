@@ -1,0 +1,138 @@
+ul,li,dl,dt,dd
+{
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+.bar
+{
+    background: url("jquery.ui/images/ui-bg_highlight-soft_75_cccccc_1x100.png");
+    background-size: 100% 100%;
+    border-radius: 0.3em;
+    min-height: 2em;
+    margin-bottom: 0.2em;
+}
+.bar *
+{
+    font-family: "Verdana", "Arial", sans-serif;
+    color: #555;
+    font-size: 105%;
+}
+.bar>ul>li
+{
+    display: inline-block;
+}
+.tool
+{
+    clear: left;
+    margin: 0.8em 0.5em;
+    vertical-align: top;
+    height: 4em;
+}
+.hidden .tool,.hidden .tab
+{
+    display: none;
+}
+.tool :disabled
+{
+    color: #AAA;
+    cursor: auto;
+}
+.tool dt
+{
+    clear: left; 
+    float: left;
+    width: 5em;
+}
+.tool dd
+{
+    float: left;
+    margin: 0;
+}
+.tool li,.tool dt,.tool dd
+{
+    min-height: 2em;
+}
+.tool button
+{
+    background-color: #E5E5E5;
+    cursor: pointer;
+    border-radius: 0.3em;
+    height: 100%;
+    padding: 0 0.5em;
+}
+.tool select
+{
+    max-width: 15em;
+}
+.tab a
+{
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    height: 1.4em;
+    padding: 0.7em 0.5em;
+    border-radius: 0.3em;
+}
+.tab.current a
+{
+    background-color: #69F;
+}
+.tab a:hover,.tab a:active,.user:hover>span,.user li:hover
+{
+    background-color: #9CF;
+}
+.hide
+{
+    float: right;
+    vertical-align: top;
+    margin: 0.2em;
+}
+.hide :hover
+{
+    cursor: pointer;
+    color: #F00;
+}
+.user
+{
+    float: right;
+}
+.user>span
+{
+    display: block;
+    cursor: default;
+    height: 1.4em;
+    padding: 0.7em 0.5em;
+    border-radius: 0.3em 0.3em 0 0;
+}
+.user div
+{
+    position: relative;
+    display: none;
+}
+.user:hover div
+{
+    display: block;
+}
+.user ul
+{
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 0.3em 0 0.3em 0.3em;
+    background: #999;
+}
+.user li
+{
+    padding: 0.3em;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.user li:first-child
+{
+    border-radius: 0.3em 0 0 0;
+}
+.user li:last-child
+{
+    border-radius: 0 0 0.3em 0.3em;
+}

@@ -1,0 +1,55 @@
+/* Внешний вид самой таблицы */
+.conduit {
+    border-collapse:collapse;
+	border:thin solid;
+	cursor:default;
+    -webkit-user-select:none; 
+    -moz-user-select:none;
+}
+
+.conduit th, .conduit td {
+	border:thin solid;
+}
+
+/* Двойная граница между задачами */
+.conduit .problemStart {
+	border-left:medium double;
+}
+
+.conduit tr[data-pupil] td {
+	text-align:center;
+	cursor:pointer;
+}
+
+/* Минимальная ширина столбцов с задачами */
+.conduit .problemName {
+	min-width:1em;
+}
+
+/* Форматирование имён школьников */
+.conduit .pupilName {
+	text-align: left;
+    padding: 0.35em 0.4em 0.35em 0.25em;
+}
+
+/* Подсветка столбцов в зависимости от типа(сложности) задачи */
+.conduit col[data-sign="*"], .conduit col[data-sign="**"] {
+	background-color:#BBB;
+}
+.conduit col[data-sign="°"] {
+	background-color:#DDD;
+}
+
+/* Подсветка при наведении курсора */
+.conduit:not(#dummy) .mouseOver {
+	background-color:yellow;
+}
+
+/* Подсветка текущей метки */
+.conduit:not(#dummy) .highlighted {
+	background-color:pink;
+}
+
+.floatHeader {
+	background-color: #FFF;
+}

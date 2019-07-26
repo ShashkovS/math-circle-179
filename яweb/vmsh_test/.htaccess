@@ -1,0 +1,62 @@
+# Запрет на прямой доступ к файлам *.inc, *.rar
+<Files "*.inc">
+    Order Deny,Allow
+    Deny from all
+</Files>
+<Files "*.rar">
+    Order Deny,Allow
+    Deny from all
+</Files>
+# Запрещаем показывать список файлов в директориях, где нет индексного файла
+Options -Indexes
+# Убеждаемся, что всё настроено по дефолту
+php_value magic_quotes_gpc off
+php_value register_globals off
+# Turn ETags Off
+
+Options +FollowSymLinks
+RewriteEngine on
+
+
+
+# Перенаправляем со всех возможных начальных страниц по ВМШ на одну и ту же
+RewriteCond %{HTTP_HOST} ^shashkovs.ru
+RewriteRule (.*) https://www.shashkovs.ru/vmsh_test/$1 [R=301,L]
+
+RewriteCond %{THE_REQUEST} /about/index [NC]
+RewriteRule ^.*$ https://www.shashkovs.ru/vmsh_test/about.html [R=301,L]
+RewriteCond %{THE_REQUEST} /contact/index [NC]
+RewriteRule ^.*$ https://www.shashkovs.ru/vmsh_test/contact.html [R=301,L]
+RewriteCond %{THE_REQUEST} /index [NC]
+RewriteRule ^.*$ https://www.shashkovs.ru/vmsh_test/ [R=301,L]
+RewriteRule ^karusel/(.*)$ karusel/wrt_ans2.php
+
+
+# Перенаправляем все попытки получить html или pdf с задачами или решениями
+RewriteRule ^data/(.*)$ c/checkdates.php?file=$1
+RewriteRule ^i/(.*)$ c/checkdates.php?file=$1
+
+# Кешируем всё
+ExpiresActive On
+ExpiresByType image/x-icon A604800
+ExpiresByType image/gif A604800
+ExpiresByType image/jpeg A604800
+# ExpiresByType image/png A604800  # в хедере у нас header('Cache-Control: max-age=604800, immutable');
+ExpiresByType text/css A604800
+ExpiresByType text/javascript A604800
+ExpiresByType application/x-javascript A604800
+
+
+# Пути для поиска файлов
+php_value include_path "/home/host1000218/shashkovs.ru/htdocs/www/vmsh_test/c/"
+
+# Сообщения об ошибках
+ErrorDocument 401 https://www.shashkovs.ru/vmsh_test/401.html
+ErrorDocument 403 https://www.shashkovs.ru/vmsh_test/403.html
+ErrorDocument 404 https://www.shashkovs.ru/vmsh_test/
+ErrorDocument 500 https://www.shashkovs.ru/vmsh_test/
+
+# Логирование ошибок
+php_value display_errors off
+php_value display_startup_errors off
+php_value error_log "/home/host1000218/shashkovs.ru/htdocs/www/vmsh_test/conduit/conduit.log"

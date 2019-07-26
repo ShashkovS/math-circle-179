@@ -1,0 +1,17 @@
+#XML
+{
+    width:50%;
+    overflow:scroll;
+    white-space:nowrap;
+}
+
+#Ruler
+{
+    overflow:hidden;
+    text-align:right;
+    border-style:solid; 
+    border-width:medium thin medium medium;
+    border-color:gray;
+    padding-left:0.5em;
+    float:left;
+}
