@@ -206,25 +206,35 @@ def process_images(data, wrk):
     return data
 
 
+def find_tex_parm_group(data, strpos):
+    while re.fullmatch(r'\s', data[strpos]): strpos += 1
+    # strpos — первый непробельный после frac. Если это не {, то весь числитель — один символ
+    endpos = strpos + 1
+    if data[strpos] == '{':
+        deep = 1
+        while deep > 0:
+            if data[endpos] == '}':
+                deep -= 1
+            elif data[endpos] == '{':
+                deep += 1
+            endpos += 1
+    return strpos, endpos
+
+
 def process_fractions(data):
-    data = re.sub(r'\\dfrac([^a-z])', r'\\frac\1', data)
-    data = re.sub(r'\$\\frac(\d)(\d)\$', '\1/\2', data)
-    data = re.sub(r'\\frac(\d)(\d)(\D)', '\1/\2\3', data)
-    # data = re.sub(r'_(\w)', r'<sub>\1</sub>', data)
-    # data = re.sub(r'\^(\w)', r'<sup>\1</sup>', data)
-    # Дроби
+    data = re.sub(r'\\dfrac(?![a-zA-Z])', r'\\frac', data)
     frac_html = r"""<span style="display: inline-block; vertical-align:middle; padding: 0 5px; text-align: center; white-space: nowrap;">
-    <span style="vertical-align: bottom; border-bottom: 1px solid Black; display: block;">
-    \1</span>
-    <span style="vertical-align: top;">
-    \2</span>
-    </span>"""
-    data = re.sub(r'\$\s*\\frac\{([^{}]*)\}\s*\{([^{}]*)\}\s*\$', frac_html, data)
-    data = re.sub(r'\$\s*\\frac(\d)\s*\{([^{}]*)\}\s*\$', frac_html, data)
-    data = re.sub(r'\$\s*\\frac\{([^{}]*)\}(\d)\s*\$', frac_html, data)
-    data = re.sub(r'\\frac\{([^{}]*)\}\s*\{([^{}]*)\}', frac_html, data)
-    data = re.sub(r'\\frac(\d)\s*\{([^{}]*)\}', frac_html, data)
-    data = re.sub(r'\\frac\{([^{}]*)\}(\d)', frac_html, data)
+    <span style="vertical-align: bottom; border-bottom: 1px solid Black; display: block;">{}</span>
+    <span style="vertical-align: top;">{}</span>
+    </span>""".replace('\n', '')
+
+    frac = re.search(r'\\frac(?![a-zA-Z])', data)
+    while frac:
+        frs, fre = frac.span()
+        ts, te = find_tex_parm_group(data, fre)
+        bs, be = find_tex_parm_group(data, te)
+        data = data[:frs] + frac_html.format(data[ts:te].strip('{}'), data[bs:be].strip('{}')) + data[be:]
+        frac = re.search(r'\\frac(?![a-zA-Z])', data)
     data = re.sub(r'\\over\s+', '/', data)
     return data
 
@@ -401,6 +411,8 @@ def do_all_wrk_stuff(wrk):
     data = data.replace(r'допраздел', '\n\n\\задачаDOP_PART_W4MCFkw6VF\\кзадача\n')
     # Заменяем отельные символы и команды
     data = replace_single_characters(data)
+    # Удаляем команды text
+    data = re.sub(r'\\text\{(.*?)\}', r'\1', data)
     # Заменяем \over на \frac
     data = replace_over(data)
     # Обрабатываем картинки
