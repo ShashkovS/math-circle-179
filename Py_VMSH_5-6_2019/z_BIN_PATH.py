@@ -41,12 +41,12 @@ for file in texify_path_to_try:
         TEXIFY_PATH = file
         break
 else:
-    raise ValueError('Укажите правильный путь в переменной TEXIFY_PATH в файле z_BIN_PATH.py')
+    raise ValueError('Укажите правильный путь в конце списка texify_path_to_try в файле z_BIN_PATH.py')
 
 for file in ghostscript_path_to_try:
     if os.path.isfile(file):
         GS_PATH = file
         break
 else:
-    raise ValueError('Укажите правильный путь в переменной GS_PATH в файле z_BIN_PATH.py')
+    raise ValueError('Укажите правильный путь в конце списка ghostscript_path_to_try в файле z_BIN_PATH.py')
 
