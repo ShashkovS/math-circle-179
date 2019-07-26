@@ -4,9 +4,10 @@ from z_CONSTS import *
 from z_helpers import *
 from PyPDF2 import PdfFileMerger, PdfFileWriter, PdfFileReader
 from copy import copy
+from multiprocessing import Pool
 
 #work = (bas,)
-work = (pro, )
+# work = (pro, )
 
 
 if PORTRAIT_ORIENTATION:
@@ -17,7 +18,7 @@ if PORTRAIT_ORIENTATION:
 
 
 def remove_old_pdfs(wrk):
-    lg.info('Удаляем старые pdf...')
+    lg.info(wrk["short_eng_level"] + 'Удаляем старые pdf...')
     for name in os.listdir(PRINT_PDFS_PATH):
         if name.startswith(wrk['prt_pdf_prefix']) and name.lower().endswith('.pdf'):
             os.remove(os.path.join(PRINT_PDFS_PATH, name))
@@ -28,9 +29,8 @@ def crt_big_counduits(wrk, r_in_pdf_conduit, r_prev_name_conduit):
     # Берём со второго по предпоследний лист из cur_name_conduit,
     # каждой второй страницей берём последний лист prev_name_conduit
     filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "3_aud_conds_" + ("(2side!)" if r_prev_name_conduit else "") + '.pdf')
-    lg.info(filename + '...')
-    filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix'] + 'bigcond' + '.pdf')
-    lg.info(filename + '...')
+    lg.info(wrk["short_eng_level"] + filename + '...')
+    lg.info(wrk["short_eng_level"] + filename + '...')
     output = PdfFileWriter()
     if r_prev_name_conduit:
         old_cond = r_prev_name_conduit.getPage(r_prev_name_conduit.getNumPages()-1)
@@ -41,36 +41,32 @@ def crt_big_counduits(wrk, r_in_pdf_conduit, r_prev_name_conduit):
             output.addPage(old_cond)
     with open(filename, "wb") as f:
         output.write(f)
-    with open(filename1, "wb") as f:
-        output.write(f)
+
 
 def crt_big_counduits_new(wrk, r_in_pdf_conduit, r_prev_in_pdf_conduit):
     # Кондуиты в аудитории
     # Берём со второго по предпоследний лист из cur_name_conduit,
     # каждой второй страницей берём последний лист prev_name_conduit
     filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "3_aud_conds_" + ("(2side!)" if r_prev_name_conduit else "") + '.pdf')
-    lg.info(filename + '...')
-    filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix'] + 'bigcond' + '.pdf')
-    lg.info(filename + '...')
+    lg.info(wrk["short_eng_level"] + filename + '...')
+    lg.info(wrk["short_eng_level"] + filename + '...')
     output = PdfFileWriter()
     for i in range(1, r_in_pdf_conduit.getNumPages() - 1):
         output.addPage(r_in_pdf_conduit.getPage(i))
         output.addPage(r_prev_in_pdf_conduit.getPage(i))
     with open(filename, "wb") as f:
         output.write(f)
-    with open(filename1, "wb") as f:
-        output.write(f)
+
 
 def crt_teacher_texts_ans_counduits(wrk, r_in_pdf_conduit, r_in_pdf_teacher):
     filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "4_teacher_task_and_cond_(2side!)_("
                                              + str(wrk['teacher_conduit_copies_per_aud'])
                                              + ' copies).pdf')
-    filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix'] + 'smallcond.pdf')
-    lg.info(filename + '...')
+    lg.info(wrk["short_eng_level"] + filename + '...')
     output = PdfFileWriter()
     page0 = r_in_pdf_teacher.getPage(0)
     for i in range(1, r_in_pdf_conduit.getNumPages() - 1):
-        lg.info('  аудитория ' + str(i))
+        lg.info(wrk["short_eng_level"] + '  аудитория ' + str(i))
         if not PORTRAIT_ORIENTATION:
             output.addPage(page0)
         else:
@@ -87,12 +83,11 @@ def crt_teacher_texts_ans_counduits(wrk, r_in_pdf_conduit, r_in_pdf_teacher):
         output.addPage(page1)
     with open(filename, "wb") as f:
         output.write(f)
-    with open(filename1, "wb") as f:
-        output.write(f)
+
 
 
 def crt_current_lesson_pdf(wrk, r_in_pdf):
-    lg.info('Текущие условия и дополнительные задачи')
+    lg.info(wrk["short_eng_level"] + 'Текущие условия и дополнительные задачи')
     lvl = wrk['excel_level_const']
     reg_page = None
     both_sides = True
@@ -127,13 +122,11 @@ def crt_current_lesson_pdf(wrk, r_in_pdf):
                                              + ("(2side!)" if both_sides else "")
                                              + copys_string
                                              + '.pdf')
-    filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix']
-                            + 'uslosn.pdf')
     first_page = r_in_pdf.getPage(0)
     second_page = None
     if both_sides:
         second_page = r_in_pdf.getPage(1)
-    lg.info(filename + '...')
+    lg.info(wrk["short_eng_level"] + filename + '...')
     output = PdfFileWriter()
     for _ in range(1):
         if not PORTRAIT_ORIENTATION:
@@ -160,8 +153,7 @@ def crt_current_lesson_pdf(wrk, r_in_pdf):
             output.addPage(reg_page)
     with open(filename, "wb") as f:
         output.write(f)
-    with open(filename1, "wb") as f:
-        output.write(f)
+
 
 
 
@@ -170,7 +162,7 @@ def crt_addit_lesson_pdf(wrk, r_in_pdf):
     lvl = wrk['excel_level_const']
     both_sides = False
     r_in_pdf_pages = r_in_pdf.getNumPages()
-    lg.info("pages:" + str(r_in_pdf_pages))
+    lg.info(wrk["short_eng_level"] + "pages:" + str(r_in_pdf_pages))
 
     sizes = [r_in_pdf.getPage(i).mediaBox[2:] for i in range(r_in_pdf_pages)]
     # Здесь лютый хардкод
@@ -196,8 +188,7 @@ def crt_addit_lesson_pdf(wrk, r_in_pdf):
         copys_string = ''
     filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "2_add_comp_tasks_"
                             + ("(2side!)" if both_sides else "") + copys_string + '.pdf')
-    filename1 = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix'] + 'usldop.pdf')
-    lg.info(filename + '...')
+    lg.info(wrk["short_eng_level"] + filename + '...')
     output = PdfFileWriter()
     if not PORTRAIT_ORIENTATION:
         output.addPage(dop_page)
@@ -224,19 +215,18 @@ def crt_addit_lesson_pdf(wrk, r_in_pdf):
 
     with open(filename, "wb") as f:
         output.write(f)
-    with open(filename1, "wb") as f:
-        output.write(f)
+
 
 
 
 def crt_prev_lesson_pdf(wrk, r_prev_pdf_teacher):
-    lg.info('Условия предыдущего занятия')
+    lg.info(wrk["short_eng_level"] + 'Условия предыдущего занятия')
     if not r_prev_pdf_teacher:
         lg.error('Предыдущее занятие не найдено')
         return
     filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_pdf_prefix'] + "5_предыдущее_занятие.pdf")
     filename = os.path.join(PRINT_PDFS_PATH, wrk['prt_en_pdf_prefix'] + "uslpred.pdf")
-    lg.info(filename + '...')
+    lg.info(wrk["short_eng_level"] + filename + '...')
     output = PdfFileWriter()
     page0 = r_prev_pdf_teacher.getPage(0)
     if not PORTRAIT_ORIENTATION:
@@ -252,14 +242,14 @@ def crt_prev_lesson_pdf(wrk, r_prev_pdf_teacher):
         output.write(f)
 
 
-for wrk in work:
+def do_all_wrk_stuff(wrk):
     cur_name = os.path.join(START_PATH, wrk['tex_name_template'].format(cur_les=cur_les)).replace('.tex', '.pdf')
     cur_name_teacher = os.path.join(DUMMY_FOLDER_PATH, wrk['dummy_tex_teacher_template'].format(cur_les=cur_les).replace('.tex', '.pdf'))
     cur_name_conduit = os.path.join(DUMMY_FOLDER_PATH, wrk['dummy_tex_conduit_template'].format(cur_les=cur_les).replace('.tex', '.pdf'))
     cur_name_prev_conduit = os.path.join(DUMMY_FOLDER_PATH,wrk['dummy_tex_prev_conduit_template'].format(cur_les=cur_les).replace('.tex', '.pdf'))
     prev_name_teacher = os.path.join(DUMMY_FOLDER_PATH, wrk['dummy_tex_teacher_template'].format(cur_les=prev_les).replace('.tex', '.pdf')) ##
     prev_name_conduit = os.path.join(DUMMY_FOLDER_PATH, wrk['dummy_tex_conduit_template'].format(cur_les=prev_les).replace('.tex', '.pdf')) ##
-    lg.info('Окучиваем для печати ' + cur_name)
+    lg.info(wrk["short_eng_level"] + 'Окучиваем для печати ' + cur_name)
 
     # Открываем PDF-файлы
     r_in_pdf = PdfFileReader(open(cur_name, "rb"))
@@ -285,3 +275,13 @@ for wrk in work:
    # crt_big_counduits_new(wrk, r_in_pdf_conduit, r_prev_in_pdf_conduit)
     crt_prev_lesson_pdf(wrk, r_prev_pdf_teacher)
     crt_teacher_texts_ans_counduits(wrk, r_in_pdf_conduit, r_in_pdf_teacher)
+
+
+if __name__ == '__main__':
+    pool = Pool(processes=2)
+    # Запускаем по процессу на начинающих и продолжающих
+    result = pool.map_async(do_all_wrk_stuff, work)
+    result.get(timeout=120)
+
+    lg.info("")
+    lg.info("Всё готово!")
