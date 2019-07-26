@@ -62,7 +62,7 @@ switch ($ext) {
     }
     $path = "../data/$file";
     header('Content-type: application/pdf');
-    header('Content-Disposition: attachment; filename="' . $file . '"');
+    header('Content-Disposition: inline; filename="' . $file . '"');
     break;
   case "html.les" : 
     if ($lesdt->format('Y-m-d H:i:s') > $curdt->format('Y-m-d H:i:s')) {

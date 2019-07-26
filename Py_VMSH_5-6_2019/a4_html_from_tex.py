@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-.
+from multiprocessing import Pool
 from z_CONSTS import *
 from z_helpers import *
 import re
@@ -57,6 +58,7 @@ def remove_comments_spaces_text_after_end_doc(data):
     data = data.replace('\\hfill', '')
     data = data.replace('\\break', '')
     data = re.sub(r'\\УстановитьГраницы.*', '', data)
+    data = re.sub(r'\\hangindent\s*-?\w+\\hangafter\s*-?\w+', '', data)
     data = re.sub(r'\\parshape(.*)\n', r'', data)
     data = re.sub(r'\\phantom\{.*?\}', '', data)
     data = re.sub(r'\\[vh]space\{.*?\}', '', data)
@@ -64,7 +66,7 @@ def remove_comments_spaces_text_after_end_doc(data):
     return data
 
 
-def cur_tikz_pictures(data):
+def cur_tikz_pictures(data, tex_file):
     pos = []
     tikz_pictures_texts = []
     tikz_pictures_names = []
@@ -352,7 +354,7 @@ def copy_images_to_html_folders(data, wrk):
         to_filename = '{:02}-{}-I{:02}.png'.format(cur_les, wrk['short_eng_level'], j)
         try:
             shutil.copy(os.path.join(START_PATH, PICT_DIR, filename),
-                        os.path.join(START_PATH, htmls_path, 'i', to_filename))
+                        os.path.join(START_PATH, wrk['htmls_path'], 'i', to_filename))
             lg.info('{} -> {}'.format(filename, to_filename))
         except:
             lg.error('Не удалось скопировать {} в {}'.format(filename, to_filename))
@@ -381,54 +383,63 @@ def upload_to_site(wrk):
             lg.info(os.path.join(img_path, img_filename) + ' done')
 
 
+def do_all_wrk_stuff(wrk):
+    htmls_path = wrk['htmls_path']
+    tex_file = os.path.join(START_PATH, wrk['tex_name_template'].format(cur_les=cur_les))
+    res_file = os.path.join(START_PATH, htmls_path, wrk['htmls_htmls_template'].format(cur_les=cur_les))
+
+    data = open(tex_file, 'r', encoding='windows-1251').read()
+    lg.info('Открыли ТеХ файл, обрабатываем ' + tex_file)
+
+    # Подменяем спецсимволы
+    data = repl_spec_chars(data)
+    # Удаляем комментарии и треш
+    data = remove_comments_spaces_text_after_end_doc(data)
+    # Вырезаем tikz-картинки
+    data, tikz_pictures_texts, tikz_pictures_names = cur_tikz_pictures(data, tex_file)
+    # Сохраняем допраздел
+    data = data.replace(r'допраздел', '\n\n\\задачаDOP_PART_W4MCFkw6VF\\кзадача\n')
+    # Заменяем отельные символы и команды
+    data = replace_single_characters(data)
+    # Заменяем \over на \frac
+    data = replace_over(data)
+    # Обрабатываем картинки
+    data = process_images(data, wrk)
+    # Обрабатываем индексы и степени
+    data = repl_indexes_and_powers(data)
+    # Обрабатываем дроби
+    data = process_fractions(data)
+    # Выбрасываем всё кроме задач
+    data = remove_non_problem_text(data)
+    # Возвращаем насильно испорченное
+    data = fix_dummy_problem_replaces(data)
+    # Подменяем разнообразные мат-формулы
+    data = replace_math(data)
+    # Проставляем нумерацию задач и пунктов
+    data = cvt_problem_and_puncts(data)
+    # Проставляем нумерацию изображений
+    data = numerize_images(data)
+    # Прячем нераспознанные команды
+    data = hide_unknown_commands(data)
+    # Ок, готово, сохраняем
+    with open(res_file, 'w', encoding='utf-8') as f:
+        lg.debug(data)
+        f.write(data)
+    # Конвертим картинки tikz в png
+    crt_pgns_from_tikz(tikz_pictures_texts, tikz_pictures_names)
+    # Копируем картинки в соответствующую папку (с переименованием)
+    copy_images_to_html_folders(data, wrk)
+    # Выргужаем на сайт
+    upload_to_site(wrk)
+    # Ура!
+    lg.info('Блин, ну мы сделали это! Сколько говонокода, а?')
+
+
 if __name__ == '__main__':
-    for wrk in work:
-        htmls_path = wrk['htmls_path']
-        tex_file = os.path.join(START_PATH, wrk['tex_name_template'].format(cur_les=cur_les))
-        res_file = os.path.join(START_PATH, htmls_path, wrk['htmls_htmls_template'].format(cur_les=cur_les))
+    pool = Pool(processes=2)
+    # Запускаем по процессу на начинающих и продолжающих
+    result = pool.map_async(do_all_wrk_stuff, work)
+    result.get(timeout=120)
 
-        data = open(tex_file, 'r', encoding='windows-1251').read()
-        lg.info('Открыли ТеХ файл, обрабатываем ' + tex_file)
-
-        # Подменяем спецсимволы
-        data = repl_spec_chars(data)
-        # Удаляем комментарии и треш
-        data = remove_comments_spaces_text_after_end_doc(data)
-        # Вырезаем tikz-картинки
-        data, tikz_pictures_texts, tikz_pictures_names = cur_tikz_pictures(data)
-        # Сохраняем допраздел
-        data = data.replace(r'допраздел', '\n\n\\задачаDOP_PART_W4MCFkw6VF\\кзадача\n')
-        # Заменяем отельные символы и команды
-        data = replace_single_characters(data)
-        # Заменяем \over на \frac
-        data = replace_over(data)
-        # Обрабатываем картинки
-        data = process_images(data, wrk)
-        # Обрабатываем индексы и степени
-        data = repl_indexes_and_powers(data)
-        # Обрабатываем дроби
-        data = process_fractions(data)
-        # Выбрасываем всё кроме задач
-        data = remove_non_problem_text(data)
-        # Возвращаем насильно испорченное
-        data = fix_dummy_problem_replaces(data)
-        # Подменяем разнообразные мат-формулы
-        data = replace_math(data)
-        # Проставляем нумерацию задач и пунктов
-        data = cvt_problem_and_puncts(data)
-        # Проставляем нумерацию изображений
-        data = numerize_images(data)
-        # Прячем нераспознанные команды
-        data = hide_unknown_commands(data)
-        # Ок, готово, сохраняем
-        with open(res_file, 'w', encoding='utf-8') as f:
-            lg.debug(data)
-            f.write(data)
-        # Конвертим картинки tikz в png
-        crt_pgns_from_tikz(tikz_pictures_texts, tikz_pictures_names)
-        # Копируем картинки в соответствующую папку (с переименованием)
-        copy_images_to_html_folders(data, wrk)
-        # Выргужаем на сайт
-        upload_to_site(wrk)
-        # Ура!
-        lg.info('Блин, ну мы сделали это! Сколько говонокода, а?')
+    lg.info("")
+    lg.info("Всё готово!")
