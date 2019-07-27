@@ -212,6 +212,3 @@ def code128_image(data, height=120, thickness=3, quiet_zone=True):
 
     return img
 
-
-img = code128_image(str(2**50) + '0'*100)
-img.save(r'Y:\i128.png')

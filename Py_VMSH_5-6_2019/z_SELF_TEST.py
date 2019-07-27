@@ -31,7 +31,7 @@ from z_CONSTS import *
 lg.info('*'*50)
 lg.info('Проверяем файл с кондуитом...')
 from z_helpers import *
-pup_lst = parse_xls_conduit(XLS_CONDUIT_NAME_TEMPLATE.replace(f'{cur_les:02}', '00'))
+pup_lst = parse_xls_conduit(XLS_CONDUIT_NAME.replace(f'{cur_les:02}', '00'))
 lg.info('Прочиталось следующее:')
 for row in pup_lst:
     lg.info(str(row))

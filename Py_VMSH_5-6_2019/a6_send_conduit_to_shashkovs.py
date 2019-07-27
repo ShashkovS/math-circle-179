@@ -8,8 +8,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 stats = read_stats()
 
-lg.info('Открываем файл (займёт время) ' + XLS_CONDUIT_NAME_TEMPLATE)
-rb = xlrd.open_workbook(XLS_CONDUIT_NAME_TEMPLATE)
+lg.info('Открываем файл (займёт время) ' + XLS_CONDUIT_NAME)
+rb = xlrd.open_workbook(XLS_CONDUIT_NAME)
 sheet = rb.sheet_by_index(0)
 
 

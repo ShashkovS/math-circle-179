@@ -29,7 +29,7 @@ def gen_spisok_files(res):
         cur_names = sorted(((x['ФИО'], x['Клс'], x['Ср3'], x['IDd']) for x in res if x['Аудитория'] == aud),
                            key=lambda x: x[0].lower().replace('ё', 'е'))
         # Генерим штрихкод с их id-шниками
-        crt_aud_barcode(aud, [row[-1] for row in cur_names])
+        crt_aud_barcode(aud, [row[-1] for row in cur_names], cur_les)
         # Добавляем спец. строчку для минимальной ширины
         cur_names.append((spisok_template['dummy_line'].format(), '', '', ''))
         # Добиваем строчек до нужного числа
@@ -190,7 +190,7 @@ def upd_stats(pup_lst):
     update_stats(stats)
 
 
-pup_lst = parse_xls_conduit(XLS_CONDUIT_NAME_TEMPLATE)
+pup_lst = parse_xls_conduit(XLS_CONDUIT_NAME)
 
 lg.info("В данном контексте нам не нужны скрытые школьники. А также, у которых нет аудитории. Убираем")
 pup_lst = [pup for pup in pup_lst if

@@ -452,7 +452,7 @@
 \@cell={\vbox to 0.8\@cellHeight{\vss\hbox{\strut\arabic{@studentnum}.}\vss}\stepcounter{@studentnum}& & \ }
 \newtoks\список
 \newtoks\пометка
-\newtoks\штрихкод
+\newtoks\barcode
 \newtoks\@xmlTableW           \@xmlTableW={<?xml version='1.0'?>\par}
 \newlength{\@cellHeight}
 \newlength{\@cellWidth}
@@ -1032,7 +1032,7 @@
     \end{tabular}%
     \hss
   }%
-  \ifcat\relax\detokenize\expandafter{\the\штрихкод}\relax\else\vspace{2mm}\noindent\centerline{\includegraphics[height=1cm]{\the\штрихкод}}\fi%
+  \ifcat\relax\detokenize\expandafter{\the\barcode}\relax\else\vspace{2mm}\noindent\centerline{\includegraphics[width=20cm]{\the\barcode}}\fi%
   \vspace{20truemm minus 17truemm}%
   \vfill%
 \endgroup%

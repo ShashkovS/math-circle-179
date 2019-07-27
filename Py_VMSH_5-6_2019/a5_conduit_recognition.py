@@ -13,7 +13,6 @@ os.chdir(START_PATH)
 VERBOSE = False
 
 res_prefix = '../'
-PDF_FILENAME = 'Scan{:02}.pdf'.format(cur_les)
 path = '.'
 os.chdir(path)
 
@@ -159,11 +158,11 @@ def join_recognized_and_xlsx(recognized_pages, xlsx_data, stats):
 
 if __name__ == '__main__':
     stt = time()
+    PDF_FILENAME = 'Scan{:02}.pdf'.format(cur_les)
     recognized_pages = prc_list_of_files(PDF_FILENAME, black_threshold=240,
                                          unmark_useless_cells_func=unmark_useless_cells,
                                          remove_useless_cells_func=remove_useless_cells)
     import pickle
-
     with open('recognized.pickle', 'wb') as f:
         pickle.dump(recognized_pages, file=f)
     print('Done in ', time() - stt)
@@ -171,7 +170,7 @@ if __name__ == '__main__':
     #     recognized_pages = pickle.load(file=f)
 
     os.chdir(r"..")
-    xlsx_data = parse_xls_conduit(XLS_CONDUIT_NAME_TEMPLATE)
+    xlsx_data = parse_xls_conduit(XLS_CONDUIT_NAME)
 
     stats = read_stats()
     join_recognized_and_xlsx(recognized_pages, xlsx_data, stats)

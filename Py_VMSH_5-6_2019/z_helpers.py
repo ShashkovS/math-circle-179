@@ -185,7 +185,29 @@ def update_stats(stats):
         pickle.dump(stats, file=f)
 
 
-def crt_aud_barcode(aud, ids):
+def fmt_one_num_for_barcode(num):
+    ELEM_LEN = 4  # Каждый элемент — ровно 4 цифры
+    num = str(num).zfill(ELEM_LEN)[-ELEM_LEN:]  # Берём правые 4 цифры
+    if not num.isdecimal():
+        lg.error('Увы, нет возможности создавать штрихкод не из чисел')
+        num = '0000'
+    return num
+
+
+def crt_aud_barcode(aud, ids, les_num):
+    from bar_utils.code128_gen import code128_image
+    HASH_CONST = [4859, 3819, 4724, 6031]
+    data = [les_num, aud, *ids]
+    data.extend([0] * (31 - len(data)))  # Добиваем до фиксированной длины
+    hash = sum(int(data[i]) * HASH_CONST[i % 4] for i in range(len(data))) % 10000
+    data.append(hash)
+    data4 = [fmt_one_num_for_barcode(num) for num in data]
+    datas = ''.join(data4)
+    image = code128_image(datas, height=70, thickness=3)
+    image.save(os.path.join(DUMMY_FOLDER_PATH, BARCODES, 'barcode_{}.png'.format(aud)))
+
+
+def crt_aud_barcode_417(aud, ids):
     from pdf417gen import encode, render_image
     ELEM_LEN = 4
     assert ELEM_LEN == 4  # Иначе переделывать нужно

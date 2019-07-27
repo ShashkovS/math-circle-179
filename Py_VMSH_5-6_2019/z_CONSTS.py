@@ -30,7 +30,7 @@ DUMMY_FOLDER_PATH = r"яdummy_files/"
 XLS_CONDUIT_PATH = 'Кондуиты/'
 PRINT_PDFS_PATH = 'Текущая печать/'
 
-XLS_CONDUIT_NAME_TEMPLATE = os.path.join(XLS_CONDUIT_PATH, f'Кондуит {cur_les:02}.xlsm')  # Маска имени кондуита
+XLS_CONDUIT_NAME = os.path.join(XLS_CONDUIT_PATH, f'Кондуит {cur_les:02}.xlsm')  # Маска имени кондуита
 XLS_CONDUIT_SHEET = 'Итог'
 CRT_COUNDUIT_COMMAND = '\СделатьКондуитИз{4.4mm}{6mm}'
 

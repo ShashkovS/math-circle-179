@@ -42,9 +42,7 @@ def yield_images_from_pdf(pdf_filename, pages_to_process=None):
         # TODO: ASCIIHexDecode ASCII85Decode LZWDecode FlateDecode RunLengthDecode CCITTFaxDecode JBIG2Decode DCTDecode JPXDecode
         # TODO: Вот дока: http://www.adobe.com/content/dam/Adobe/en/devnet/acrobat/pdfs/pdf_reference_1-7.pdf, стр. 67
         # TODO: Самое сложное — JBIG2Decode, это достаточно новый формат с непростым кодированием
-        # TODO: Реализация на js: https://github.com/mozilla/pdf.js/blob/ca936ee0c7ac5baeca76a45dfc5485b3607de290/src/core/jbig2.js
-        # TODO: Хорошая реализация на C: http://www.artifex.com/jbig2dec/download/jbig2dec-0.13.tar.gz
-        # TODO: Реализация на .NET: https://github.com/devteamexpress/JBig2Decoder.NET
+        # TODO: Реализация на js: https://github.com/mozilla/pdf.js/blob/master/src/core/jbig2.js
         # TODO: После того, как будут реализованы все стандарты, из этого нужно будет сделать отдельную либу.
         # TODO: В данный момент аналогов нет, будет новьё. И статью на habr о мучениях в процессе
         cond_scan_reader = PyPDF2.PdfFileReader(pdf_file)
