@@ -65,8 +65,6 @@ def upload_to_site(wrk):
 def do_all_wrk_stuff(wrk):
     # Выргужаем на сайт задание
     upload_to_site(wrk)
-    # Ура!
-    lg.info('Блин, ну мы сделали это! Сколько говонокода, а?')
 
 
 if __name__ == '__main__':
