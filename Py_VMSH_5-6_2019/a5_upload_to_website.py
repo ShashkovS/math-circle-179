@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-.
 from multiprocessing import Pool
 from z_helpers import *
+from shutil import copyfile
 from datetime import datetime
 import ftplib
 import io
@@ -16,6 +17,12 @@ import io
 
 
 def upload_to_site(wrk):
+    # Освежаем pdf с условиями на всякий случай
+    lesson_pdf_name = os.path.join(START_PATH, DUMMY_FOLDER_PATH, wrk['dummy_tex_lesson_template'].format(cur_les=cur_les).replace('.tex', '.pdf'))
+    dst_pdf_name = os.path.join(START_PATH, wrk['htmls_path'], wrk['htmls_pdfs_template'].format(cur_les=cur_les))
+    lg.info(f'Копируем {lesson_pdf_name} в {dst_pdf_name}')
+    copyfile(lesson_pdf_name, dst_pdf_name)
+
     ftp_path = wrk['ftp_path']
     htmls_path = wrk['htmls_path']
     lg.info('Шлём условия по ftp в ' + ftp_path)

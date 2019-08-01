@@ -3,6 +3,7 @@ from multiprocessing import Pool
 from datetime import datetime
 from z_CONSTS import *
 from z_helpers import *
+from shutil import copyfile
 import re
 import ftplib
 
@@ -433,6 +434,11 @@ def do_all_wrk_stuff(wrk):
     htmls_path = wrk['htmls_path']
     tex_file = os.path.join(START_PATH, wrk['tex_name_template'].format(cur_les=cur_les))
     res_file = os.path.join(START_PATH, htmls_path, wrk['htmls_htmls_template'].format(cur_les=cur_les))
+
+    lesson_pdf_name = os.path.join(START_PATH, DUMMY_FOLDER_PATH, wrk['dummy_tex_lesson_template'].format(cur_les=cur_les).replace('.tex', '.pdf'))
+    dst_pdf_name = os.path.join(START_PATH, wrk['htmls_path'], wrk['htmls_pdfs_template'].format(cur_les=cur_les))
+    lg.info(f'Копируем {lesson_pdf_name} в {dst_pdf_name}')
+    copyfile(lesson_pdf_name, dst_pdf_name)
 
     data = open(tex_file, 'r', encoding='windows-1251').read()
     lg.info('Открыли ТеХ файл, обрабатываем ' + tex_file)
