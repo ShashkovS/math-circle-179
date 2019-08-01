@@ -42,8 +42,8 @@ class ImageProcessor():
             self.np_orig_image = np.array(image.convert("L"))
 
  #Если вдруг изначально изображение повёрнуто, можно раскоментить эти строчки.
-        im = cv2.transpose(self.np_orig_image)
-        self.np_orig_image = cv2.flip(im,0)
+        # im = cv2.transpose(self.np_orig_image)
+        # self.np_orig_image = cv2.flip(im,0)
 
         # Делаем ресайз
         for resize_to in (RESIZE_TO1, RESIZE_TO2):

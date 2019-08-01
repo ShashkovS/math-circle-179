@@ -151,14 +151,14 @@ def join_recognized_and_xlsx(recognized_pages, xlsx_data, stats):
             for clmn, res in enumerate(item['Результат']):
                 if res:
                     sheet.write(rown, clmn + col_mov + 4, 1)
-    save_dest = os.path.join(START_PATH, 'results.xls')
+    save_dest = os.path.join(START_PATH, '..', 'Сканы кондуитов', 'results.xls')
     lg.info('Сохраняем результат в ' + save_dest)
     workbook.save(save_dest)
 
 
 if __name__ == '__main__':
     stt = time()
-    PDF_FILENAME = 'Scan{:02}.pdf'.format(cur_les)
+    PDF_FILENAME = os.path.join('..', 'Сканы кондуитов', 'Scan{:02}.pdf'.format(cur_les))
     recognized_pages = prc_list_of_files(PDF_FILENAME, black_threshold=240,
                                          unmark_useless_cells_func=unmark_useless_cells,
                                          remove_useless_cells_func=remove_useless_cells)

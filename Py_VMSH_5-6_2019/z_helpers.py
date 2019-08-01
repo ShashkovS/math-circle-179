@@ -230,3 +230,14 @@ def parse_tex_template(path):
     tex = tex.replace('{', '{{').replace('}', '}}')
     tex = re.sub(r'<<(\w+)>>', r'{\1}', tex)
     return dict(block_finder.findall(tex))
+
+
+def parse_html_template(path):
+    block_finder = re.compile(r'(?sm)^\s*<!--%block (\w+)[^\n]*\n(.*)?^\s*<!--%block \1[^\n]*\n')
+    with open(path, 'r', encoding='utf-8') as f:
+        html = f.read()
+    html = html.replace('{', '{{').replace('}', '}}')
+    html = re.sub(r'\[\[(\w+)\]\]', r'{\1}', html)
+    return dict(block_finder.findall(html))
+
+parse_html_template(r'X:\repos\math-circle-179\Py_VMSH_5-6_2019\tex_templates\index.template.html')

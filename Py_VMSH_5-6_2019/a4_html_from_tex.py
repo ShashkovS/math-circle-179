@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-.
 from multiprocessing import Pool
+from datetime import datetime
 from z_CONSTS import *
 from z_helpers import *
 import re
@@ -370,27 +371,62 @@ def copy_images_to_html_folders(data, wrk):
             lg.error('Не удалось скопировать {} в {}'.format(filename, to_filename))
 
 
-def upload_to_site(wrk):
-    ftp_path = wrk['ftp_path']
+def create_local_test_html(wrk):
     htmls_path = wrk['htmls_path']
-    lg.info('Шлём по ftp в ' + ftp_path)
-    pdf_filename = wrk['htmls_pdfs_template'].format(cur_les=cur_les)
-    html_filename = wrk['htmls_htmls_template'].format(cur_les=cur_les)
-    pdf_full_path = os.path.join(START_PATH, htmls_path, pdf_filename)
-    html_full_path = os.path.join(START_PATH, htmls_path, html_filename)
-    img_path = os.path.join(START_PATH, htmls_path, 'i')
-    img_filenames = [name for name in os.listdir(img_path) if name.startswith('{:02}-'.format(cur_les))]
-    # Всё готово, хреначим
-    with ftplib.FTP(wrk["ftp_host"], *wrk['ftp_credentials']) as ftp:
-        ftp.cwd(ftp_path + 'data')
-        ftp.storbinary("STOR " + pdf_filename, open(pdf_full_path, 'rb'))
-        lg.info(pdf_filename + ' done')
-        ftp.storbinary("STOR " + html_filename, open(html_full_path, 'rb'))
-        lg.info(html_filename + ' done')
-        ftp.cwd(ftp_path + 'i')
-        for img_filename in img_filenames:
-            ftp.storbinary("STOR " + img_filename, open(os.path.join(img_path, img_filename), 'rb'))
-            lg.info(os.path.join(img_path, img_filename) + ' done')
+    htmls_notifications_path = wrk['htmls_notifications_path']
+    htmls = {}
+    # Вычитываем все файлы
+    for filename in os.listdir(os.path.join(START_PATH, htmls_notifications_path)):
+        full_path = os.path.join(START_PATH, htmls_notifications_path, filename)
+        if not os.path.isfile(full_path):
+            continue
+        htmls[filename] = open(full_path, 'r', encoding='utf-8').read()
+    dates = {}
+    # Парсим даты
+    for les_num, year, month, day, hour, minute, second in re.findall(r'^"(\w+)"\s*=>\s*(\d+)\D(\d+)\D(\d+)\D(\d+)\D(\d+)\D(\d+)\s*$', htmls['dates.inc'], flags=re.MULTILINE):
+        dates[les_num] = datetime(*map(int, (year, month, day, hour, minute, second)))
+    dates['∞'] = datetime(9999, 12, 31, 19, 0, 0)
+    # Находим ближайшую большую
+    next_date = min(dt for dt in dates.values() if dt >= datetime.now())
+    days_names = ["", "понедельник", "вторник", "среду", "четверг", "пятницу", "субботу", "воскресенье"]
+    month_names = ["", "января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"]
+    nearest_date = f'{days_names[next_date.isoweekday()]} {next_date.day}-го {month_names[next_date.month]}'
+
+    # Парсим шаблон
+    index_template = parse_html_template(os.path.join(PY_PROJ_DIR_PATH, 'tex_templates', 'index.template.html'))
+    result_html = []
+    # TODO Вот здесь захардкожено участие ровно двух уровней сложности
+    result_html.append(index_template['html_top'].format(other_url=bas['test_local_html'] if wrk!=bas else pro['test_local_html'],
+                                                         other_text=bas['name'] if wrk!=bas else pro['name'],
+                                                         contact_html='../' + wrk['htmls_notifications_path'] + '/contact.html',
+                                                         about_html='../' + wrk['htmls_notifications_path'] + '/about.html',
+                                                         nearest_date=nearest_date,
+                                                         onTheTopForAll=htmls['onTheTopForAll.html'],
+                                                         onTheTopForReg=htmls['onTheTopForReg.html'],
+                                                         onTheTopForNoReg=htmls['onTheTopForNoReg.html'],
+                                                         onTheTopForProOrBeg=htmls['onTheTopForPro.html'] if wrk!=bas else htmls['onTheTopForBeg.html'],
+                                                         ))
+    # Теперь добавляем все созданные задания
+    for les_html_name in os.listdir(os.path.join(START_PATH, wrk['htmls_path'])):
+        if not les_html_name.endswith('.html'): continue
+        full_les_html_path = os.path.join(START_PATH, wrk['htmls_path'], les_html_name)
+        html_les_num = re.sub('\D', '', les_html_name)  # Здесь немного треш :(
+        html_les_data = open(full_les_html_path, 'r', encoding='utf-8').read()
+        textdt = dates.get(html_les_num, None)
+        if textdt is None:
+            textdt = f'Дата занятия {html_les_num} в файле dates.inc не найдена'
+        else:
+            textdt = f'{textdt.day} {month_names[textdt.month]} {textdt.year} г.'
+        result_html.append(index_template['lesson'].format(cur_les=html_les_num,
+                                                           textdt=textdt,
+                                                           lesson_pdf='../' + wrk['htmls_path'] + '/' + wrk['htmls_pdfs_template'].format(cur_les=int(html_les_num)),
+                                                           lesson_html=html_les_data.replace(r'src="i/', r'src="../' + wrk['htmls_path'] + '/i/')))
+
+
+    result_html.append(index_template['html_footer'].format())
+    result_html_path = os.path.join(START_PATH, wrk['htmls_path'], '..', wrk['test_local_html'])
+    with open(result_html_path, 'w', encoding='utf-8') as f:
+        f.write(''.join(result_html))
 
 
 def do_all_wrk_stuff(wrk):
@@ -441,8 +477,8 @@ def do_all_wrk_stuff(wrk):
     crt_pgns_from_tikz(tikz_pictures_texts, tikz_pictures_names)
     # Копируем картинки в соответствующую папку (с переименованием)
     copy_images_to_html_folders(data, wrk)
-    # Выргужаем на сайт
-    upload_to_site(wrk)
+    # Создаём локальную версию со всеми условиями для отладки
+    create_local_test_html(wrk)
     # Ура!
     lg.info('Блин, ну мы сделали это! Сколько говонокода, а?')
 

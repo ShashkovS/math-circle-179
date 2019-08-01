@@ -1,0 +1,86 @@
+<!--%block html_top -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="VMSH">
+    <meta name="description" content="VMSH">
+    <title>ВМШ 2018-2019, 5, 6 класс, 179 школа</title>
+    <!--    TODO Прямые ссылки — не гуд совсем :( -->
+    <link rel="stylesheet" href="https://www.shashkovs.ru/vmsh_test/c/vm-sh.min.css">
+    <script src="https://www.shashkovs.ru/vmsh_test/c/vm-sh.min.js"></script>
+    <script src="https://yastatic.net/jquery/2.1.4/jquery.min.js"></script>
+    <script>
+        function show_stat() {
+            $('.stat').css('display', 'inline');
+        }
+
+        window.onload = show_stat;
+    </script>
+</head>
+
+<body>
+<div id="layout">
+    <div id="header">
+        <div class="n-left-corner"></div>
+        <div class="n-center">
+            <ul>
+                <li>
+                    <a href="[[other_url]]">[[other_text]]</a></li>
+                <li>
+                    <a href="[[about_html]]">О&nbsp;ВМШ</a>
+                </li>
+                <li>
+                    <a href="[[contact_html]]">Контакты</a>
+                </li>
+                <li>
+                    <a href="https://179.ru/" target="_blank">Сайт школы</a>
+                </li>
+            </ul>
+        </div>
+        <div class="n-right-corner"></div>
+    </div>
+    <div class="b-first"><i>(Это для всех)</i>
+        [[onTheTopForAll]]
+    </div>
+    <div class="b-first">
+        <div class="lesson b-second">
+            <h2 class="lesson_title">Ближайшее занятие ВМШ для 5 и 6 классов в 179-й школе состоится [[nearest_date]] в 16:40.</h2>
+        </div>
+    </div>
+    <div class="b-first"><i>(Это только для залогинившихся)</i>
+        [[onTheTopForReg]]
+    </div>
+    <div class="b-first"><i>(Это только для НЕ залогинившихся)</i>
+        [[onTheTopForNoReg]]
+        [[onTheTopForProOrBeg]]
+    </div>
+    <div class="b-first">
+        <!--%block html_top -->
+
+
+        <!--%block lesson -->
+        <div class="lesson b-second" id="[[cur_les]]">
+            <h2 class="lesson_title">Занятие [[cur_les]].
+                <a href="#[[cur_les]]">#</a>
+                <a class="inPDF" href="[[lesson_pdf]]">pdf</a>
+                <span class="lesDate">[[textdt]]</span>
+
+            </h2>
+            <div class="lesson_data">
+                [[lesson_html]]
+                <!--            include "data/{$number}-lesson.html";-->
+            </div>
+        </div>
+        <!--%block lesson -->
+
+
+        <!--%block html_footer -->
+    </div>
+    <div id="footer">
+    </div>
+
+</div>
+</body>
+</html>
+<!--%block html_footer -->

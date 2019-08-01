@@ -53,9 +53,9 @@ if __name__ == '__main__':
     # recognized_pages = prc_list_of_files(r'tests\test_imgs&pdfs\bad_scan.png', njobs=1)
     # print(recognized_pages)
 
-    os.chdir(r'tests\test_imgs&pdfs')
-    # images = extract_images_from_files('tst_01.pdf', pages_to_process=[0, 1])
-    images = extract_images_from_files(r'C:\Dropbox\ВМШ 5-7 класс 2017-18\Py_VMSH_2017\Scan12.pdf')
-    for image in images:
-        print(feature_qt(ImageProcessor(image)))
+    # os.chdir(r'tests\test_imgs&pdfs')
+    # # images = extract_images_from_files('tst_01.pdf', pages_to_process=[0, 1])
+    # images = extract_images_from_files(r'C:\Dropbox\ВМШ 5-7 класс 2017-18\Py_VMSH_2017\Scan12.pdf')
+    # for image in images:
+    #     print(feature_qt(ImageProcessor(image)))
 

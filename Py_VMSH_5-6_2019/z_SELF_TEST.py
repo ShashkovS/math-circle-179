@@ -81,7 +81,7 @@ if response.status_code != 200:
 
 lg.info('*'*50)
 lg.info("Проверяем работу распознавателя...")
-from a5_conduit_recognition import prc_list_of_files
+from a6_conduit_recognition import prc_list_of_files
 prc_list_of_files([os.path.join(os.path.realpath(os.path.dirname(os.path.abspath(__file__))), r'plus_reader', 'test_img.png')])
 
 
