@@ -15,9 +15,9 @@ $$
 DELIMITER ;
 
 
-/* host1000218_XXXX — пользователь базы */
+/* host1000218_XXXX — пользователь базы  DEFINER=`host1000218_XXXX`@`localhost` */
 DELIMITER $$
-CREATE DEFINER=`host1000218_XXXX`@`localhost` PROCEDURE `PutPlus`(IN `ListNumber` VARCHAR(15) CHARSET utf8, IN `ProblemName` VARCHAR(10) CHARSET utf8, IN `PupilXlsdID` CHAR(7) CHARSET utf8)
+CREATE PROCEDURE `PutPlus`(IN `ListNumber` VARCHAR(15) CHARSET utf8, IN `ProblemName` VARCHAR(10) CHARSET utf8, IN `PupilXlsdID` CHAR(7) CHARSET utf8)
     MODIFIES SQL DATA
     COMMENT 'Внести плюс данному школьнику за данную задачу в данном листке'
 BEGIN
