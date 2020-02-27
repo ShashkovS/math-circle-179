@@ -8,10 +8,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 stats = read_stats()
 
-lg.info('Открываем файл (займёт время) ' + XLS_CONDUIT_NAME)
-rb = xlrd.open_workbook(XLS_CONDUIT_NAME)
-sheet = rb.sheet_by_index(0)
-
 
 def rtv_main_part_num_prob(lvl):
     main_part = stats[cur_les][lvl]['структура']
@@ -32,6 +28,7 @@ def gen_json_lists(sheet):
         if not cv.endswith('*') and prb_hdr_matcher.match(cv):
             lstn = int(re.split('\D+', cv)[0])
             if not (cur_les - 3 <= lstn <= cur_les):
+            # if not (1 <= lstn <= cur_les):
                 continue
             col_hdr_to_colc[cv] = coln
             print(cv)
@@ -79,11 +76,14 @@ def gen_json_plus(sheet, pupil_to_rown, col_hdr_to_colc):
             lst, prb = col_hdr.split('.')
             lst = lst[:2] + '-' + lst[2:].replace('н', 'n').replace('п', 'p').replace('с', 's')
             cv = str(sheet.cell(rown, coln).value).strip().replace('.0', '')
-            if cv in ('1', 'd', 'д'):
+            if cv.lower() in ('1', 'd', 'д', 'c', 'с'):
                 marks.append({'LN': lst, 'PN': prb, 'PI': pup_id})
     return marks
 
 
+lg.info('Открываем файл (займёт время) ' + XLS_CONDUIT_NAME)
+rb = xlrd.open_workbook(XLS_CONDUIT_NAME)
+sheet = rb.sheet_by_index(0)
 json_lists, col_hdr_to_colc = gen_json_lists(sheet)
 json_pupils, pupil_to_rown = gen_json_pupils(sheet)
 json_marks = gen_json_plus(sheet, pupil_to_rown, col_hdr_to_colc)
@@ -93,6 +93,7 @@ rqs = {'lists': json_lists, 'pupils': json_pupils, 'marks': json_marks}
 print(rqs)
 url = work[0]['json_db_api_url']
 response = requests.post(url, json=rqs, auth=work[0]['json_db_credentials'])
+print(response)
 print(response.json())
 
 """

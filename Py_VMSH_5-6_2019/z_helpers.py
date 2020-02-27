@@ -3,6 +3,7 @@ import xlrd
 import pickle
 from collections import defaultdict
 from functools import lru_cache
+from collections import Counter
 from z_CONSTS import *
 from z_BIN_PATH import *
 import logging
@@ -103,7 +104,7 @@ def check_ids_unique(res):
         if not dig_id:
             lg.error(
                 'В строке {} находится ID школьника `{}`, в котором нет ненулевых цифр. Они нужны!'.format(i + FIRST_ROW,
-                                                                                                         orig_id))
+                                                                                                           orig_id))
             error_found = True
         if dig_id in ids:
             lg.error('В строках {} и {} находятся «одинаковые» ID `{}` и `{}`. Правые 4 цифры должны быть уникальны'.format(
@@ -185,6 +186,12 @@ def update_stats(stats):
         pickle.dump(stats, file=f)
 
 
+def save_pups(pupils):
+    pickle_dump_path = os.path.join(DUMMY_FOLDER_PATH, 'zpupils.pickle')
+    with open(pickle_dump_path, 'wb') as f:
+        pickle.dump(pupils, file=f)
+
+
 def fmt_one_num_for_barcode(num):
     ELEM_LEN = 4  # Каждый элемент — ровно 4 цифры
     num = str(num).zfill(ELEM_LEN)[-ELEM_LEN:]  # Берём правые 4 цифры
@@ -240,4 +247,28 @@ def parse_html_template(path):
     html = re.sub(r'\[\[(\w+)\]\]', r'{\1}', html)
     return dict(block_finder.findall(html))
 
-parse_html_template(r'X:\repos\math-circle-179\Py_VMSH_5-6_2019\tex_templates\index.template.html')
+
+parse_html_template(r'Py_VMSH_5-6_2019\tex_templates\index.template.html')
+
+
+def change_split_auds(pup_lst):
+    """Каждую аудиторию из списка SPLIT_LARGE_AUD
+    мы равномерно заменяем на список замены"""
+    pup_lst.sort(key=lambda row: (row['Аудитория'], row['ФИО'].lower().replace('ё', 'е')))
+    aud_counter = Counter(row['Аудитория'] for row in pup_lst)
+    aud_replacer = {}
+    for aud, reps in SPLIT_LARGE_AUD.items():
+        pups = aud_counter.get(aud, 0)
+        nauds = len(reps)
+        num_big = -pups % nauds
+        in_small = pups // nauds
+        aud_replacer[aud] = []
+        for i, rep_aud in enumerate(sorted(reps)):
+            aud_replacer[aud].extend([rep_aud] * (in_small + (i < num_big)))
+        aud_replacer[aud] = aud_replacer[aud][::-1]  # Чтобы можно было pop'ать аудиторию с конца
+    # Аудитории идут подряд. Поэтому как только мы дойдём до аудитории под замену,
+    # то будет последовательный кусок под замену
+    for row in pup_lst:
+        if row['Аудитория'] in aud_replacer:
+            row['Аудитория'] = aud_replacer[row['Аудитория']].pop()
+    # Всё, заменили

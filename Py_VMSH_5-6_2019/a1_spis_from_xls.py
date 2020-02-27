@@ -105,6 +105,7 @@ def gen_mega_floor_lists(res):
                         if 'phantom' not in x['ФИО']],
                       key=lambda x: x[0].lower().replace('ё', 'е'))
     for i, (pup, aud) in enumerate(pup_list):
+        print(i, (pup, aud))
         if str(aud).strip() in AUD_LIST_REPLACERS:
             pup_list[i] = (pup, AUD_LIST_REPLACERS[str(aud).strip()])
     # Если фамилий большей 348, то добавляем строчки с буквами (всё равно на одну страницу не лезет)
@@ -189,6 +190,10 @@ def upd_stats(pup_lst):
         stats[cur_les][lvl]['Аудитории'][aud] = cnt
     update_stats(stats)
 
+def save_pups(pup_lst):
+    [(def_real_level(pup['Уровень']), pup['Аудитория'], pup['Посещаемость']) for pup in pup_lst]
+
+
 
 pup_lst = parse_xls_conduit(XLS_CONDUIT_NAME)
 
@@ -196,7 +201,9 @@ lg.info("В данном контексте нам не нужны скрыты�
 pup_lst = [pup for pup in pup_lst if
            pup['Скрыть'] in (None, 0, '0', '', 0.0, '0.0') and pup['Аудитория'] and pup['Уровень']]
 lg.debug(pup_lst)
+change_split_auds(pup_lst)  # Заменяем 405 на 421, 422, 423, 424...
 upd_stats(pup_lst)
+save_pups(pup_lst)
 
 remove_old_spis()
 gen_spisok_files(pup_lst)

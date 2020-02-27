@@ -4,8 +4,9 @@ from z_helpers import *
 from shutil import copyfile
 import re
 from multiprocessing import Pool
+import time
 
-#work = (bas,)
+# work = (bas,)
 #work = (pro, )
 
 
@@ -48,6 +49,7 @@ def upd_num_add_parts_stats(wrk, data):
             problems[i] = ''
     problems = ''.join(problems)
     stats[cur_les][lvl]['структура'] = problems
+    lg.info('Распарсили структуру: ' + problems)
     problems = problems.replace('зп', 'п')
     problems = problems.replace('к', '').replace('|', '')
     stats[cur_les][lvl]['кол-во задач/пунктов'] = len(problems)
@@ -119,6 +121,8 @@ def refactor_tex(data):
     data = data.replace('DOLLAR_W4MCFkw6VF', r'\$')
     data = re.sub(r'\\graphicspath{.*}\s*$', 'graphicspath', data, flags=re.MULTILINE)
     data = data.replace('graphicspath', fr'\graphicspath{{{{../{PICT_DIR}/}}{{{BARCODES}/}}}}')
+    if 'graphicspath' not in data:
+        data = re.sub(r'(\\usepackage.*?{newlistok})\s*', f'\\1\n\\\\graphicspath{{{{../{PICT_DIR}/}}{{{BARCODES}/}}}}\n', data)
     lg.debug(('*'*100 + '\n') * 3 + 'Стало:\n' + ('*'*100 + '\n') * 3)
     lg.debug(data)
     return data
@@ -133,6 +137,7 @@ def crt_lesson_tex_for_site_pdf(data, res_name, pdf_name, htmls_path):
     data = data.replace(r'\vfilll', '')
     data = data.replace(r'\vfill', '')
     data = data.replace(r'\vfil', '')
+    data = re.sub(r'(?sm)\\begin\{comment\}.*?\\end\{comment\}', '', data)
     lg.info('Создаём и комплируем ' + res_name)
     with open(os.path.join(DUMMY_FOLDER_PATH, res_name), 'w', encoding='windows-1251') as f:
         f.write(data)
@@ -144,6 +149,7 @@ def crt_lesson_tex_for_site_pdf(data, res_name, pdf_name, htmls_path):
 
 def crt_solutions_tex(sol_data, sol_name):
     lg.info('Обрабатываем ' + sol_name)
+    solutions_inside = '\\begin{comment}' in sol_data
     if os.path.isfile(sol_name):
         lg.info(sol_name + ' уже существует. НИЧЕГО НЕ ТРОГАЕМ!')
         return
@@ -159,9 +165,11 @@ def crt_solutions_tex(sol_data, sol_name):
     else:
         sol_data = re.sub(r'(\\usepackage(?:\[[^\[\]]+\])?{newlistok})', r'\1\n\\УвеличитьШирину{20truemm}', sol_data)
     sol_data = re.sub(r'(\\usepackage(?:\[[^\[\]]+\])?{newlistok})\s*(\\[А-Яа-яёЁ])', r'\1\n\n\2', sol_data)
+    sol_data = sol_data.replace(r'\begin{comment}', r'')
+    sol_data = sol_data.replace(r'\end{comment}', r'')
     END_PROBLEM_MARK = r'\кзадача'
     end_pos = sol_data.rfind(END_PROBLEM_MARK)
-    while end_pos >= 0:
+    while not solutions_inside and end_pos >= 0:
         str_pos = sol_data.rfind(r'задача', 0, end_pos)
         if str_pos >= 0 and '\\' in sol_data[str_pos - 2:str_pos]:
             # Итак, задача простирается от str_pos до end_pos
@@ -192,6 +200,7 @@ def crt_conduit_tex(cond_data, spisok_name_template, res_name, wrk):
     lg.info('Готовим ' + res_name)
     lvl = wrk['excel_level_const']
     cond_data = cond_data.replace(r'\aaaaappage', '')
+    cond_data = re.sub(r'(?sm)\\begin\{comment\}.*?\\end\{comment\}', '', cond_data)
     stats = read_stats()
     num_conduit_problems = stats[cur_les][lvl]['кол-во задач/пунктов']
     spisok_name_template = re.sub(r'\{[^{}]+\}', r'(.*)?', spisok_name_template)
@@ -233,6 +242,7 @@ def crt_prev_conduit_tex(cond_data, spisok_name_template, res_name, wrk):
     lg.info('Готовим ' + res_name)
     lvl = wrk['excel_level_const']
     cond_data = cond_data.replace(r'\aaaaappage', '')
+    cond_data = re.sub(r'(?sm)\\begin\{comment\}.*?\\end\{comment\}', '', cond_data)
     stats = read_stats()
     num_conduit_problems = stats[prev_les][lvl]['кол-во задач/пунктов']
     spisok_name_template = re.sub(r'\{[^{}]+\}', r'(.*)?', spisok_name_template)
@@ -273,6 +283,7 @@ def crt_prev_conduit_tex(cond_data, spisok_name_template, res_name, wrk):
 
 
 def crt_teacher_edition(data, res_name):
+    data = re.sub(r'(?sm)\\begin\{comment\}.*?\\end\{comment\}', '', data)
     # Добавляем высоты
     data = re.sub(r'\\УвеличитьШирину\{.*?\}', '\\УвеличитьВысоту{27truemm}\n\\УвеличитьШирину{18truemm}', data)
     # Удаляем положительные vspace'ы
@@ -307,9 +318,9 @@ def crt_teacher_edition(data, res_name):
             min_mag = cur_mag
             last_good = cur_mag
             cur_mag = (max_mag + cur_mag) // 2
-        if max_mag - min_mag < 5 and '2 pages' not in res:
+        if max_mag - min_mag < 15 and '2 pages' not in res:
             break
-        elif max_mag - min_mag < 5:
+        elif max_mag - min_mag < 15:
             cur_mag = last_good
         elif max_mag - min_mag < 2:
             break
@@ -327,8 +338,6 @@ def do_all_wrk_stuff(wrk):
     lg.info('Обрабатываем ' + cur_name)
     with open(cur_name, 'r', encoding='windows-1251') as f:
         data = f.read()
-    # Отложим кол-во копий дополнительного задания
-    upd_num_add_parts_stats(wrk, data)
     # Делаем основное общее преобразование
     data = refactor_tex(data)
     # Файл, на основе которого готовится pdf на сайт (а также html)
@@ -366,6 +375,16 @@ if __name__ == '__main__':
     result = pool.map_async(do_all_wrk_stuff, work)
     result.get(timeout=120)
     remove_trash()
+    #
+    for wrk in work:
+        cur_name = os.path.join(START_PATH, wrk['tex_name_template'].format(cur_les=cur_les))
+        lg.info('Обрабатываем ' + cur_name)
+        with open(cur_name, 'r', encoding='windows-1251') as f:
+            data = f.read()
+        # Отложим кол-во копий дополнительного задания
+        upd_num_add_parts_stats(wrk, data)
+
 
     lg.info("")
     lg.info("Всё готово!")
+    exit()

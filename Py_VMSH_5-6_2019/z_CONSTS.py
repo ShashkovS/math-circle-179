@@ -1,16 +1,25 @@
 from z_CREDENTIALS import *
 import os
 
+import a0_dates
 # Текущее занятие
-cur_les = 1
-prev_les = cur_les - 1
-LES_DATE = '1 тестобря'
+cur_les = a0_dates.cur_les
+prev_les = a0_dates.prev_les
+LES_DATE = a0_dates.LES_DATE
 
+# В большом кондуиты аудитории ниже будут заменены
 AUD_LIST_REPLACERS = {
-    '415': '405',
-    '425': '405',
-    '435': '405',
-    '445': '405',
+    '421': '405',
+    '422': '405',
+    '423': '405',
+    '424': '405',
+}
+# Эта мега-аудитория будет разбита на несколько поменьше
+SPLIT_LARGE_AUD = {
+    # '405': [
+    #     '421', '422',
+    #     # '423', '424'
+    # ]
 }
 
 CIRCLE_TITLE = "Математический кружок для 5-6 классов, LES_DATE"
@@ -43,17 +52,18 @@ COLUMNS = {'Фамилия': "A",
            'Скрыть': "F",
            'Уровень': "G",
            'Аудитория': "L",
+           'Посещаемость': "H",
            'Ср3': "K"}
 COLUMNS = {k: ord(v) - ord('A') for (k, v) in COLUMNS.items()}
 
 # Настройки префиксов-суффиксов
 bas = {
     'name': 'Начинающие',
-    'main_problems_copies_per_aud': 18,
-    'addit_problems_copies_per_aud': 10,
+    'main_problems_copies_per_aud': 20,
+    'addit_problems_copies_per_aud': 16,
     'teacher_conduit_copies_per_aud': 4,
     'lines_in_conduit': 27,
-    'json_db_api_url': 'https://www.shashkovs.ru/vmsh_test/conduit/ajax/ParseJSON.php',
+    'json_db_api_url': 'https://www.shashkovs.ru/vmsh/conduit/ajax/ParseJSON.php',
     'tex_name_template': 'usl-{cur_les:02}-n.tex',
     'prev_tex_name_template': 'usl-{prev_les:02}-n.tex',
     'sol_tex_name_template': 'usl-{cur_les:02}-n-sol.tex',
@@ -82,11 +92,11 @@ bas = {
 
 pro = {
     'name': 'Продолжающие',
-    'main_problems_copies_per_aud': 14,
-    'addit_problems_copies_per_aud': 12,
+    'main_problems_copies_per_aud': 20,
+    'addit_problems_copies_per_aud': 16,
     'teacher_conduit_copies_per_aud': 4,
     'lines_in_conduit': 27,
-    'json_db_api_url': 'https://www.shashkovs.ru/vmsh_test/conduit/ajax/ParseJSON.php',
+    'json_db_api_url': 'https://www.shashkovs.ru/vmsh/conduit/ajax/ParseJSON.php',
     'tex_name_template': 'usl-{cur_les:02}-p.tex',
     'prev_tex_name_template': 'usl-{prev_les:02}-p.tex',
     'sol_tex_name_template': 'usl-{cur_les:02}-p-sol.tex',
@@ -115,5 +125,6 @@ pro = {
 levels = {**dict(zip(bas['other_excel_level_const'], [bas] * 100)),
           **dict(zip(pro['other_excel_level_const'], [pro] * 100))}
 work = [bas, pro]
+# work = [bas]
 ADVANCED_LEVEL_CONST = pro['excel_level_const']
 PUNCTS = 'абвгдежзиклмнопрст'

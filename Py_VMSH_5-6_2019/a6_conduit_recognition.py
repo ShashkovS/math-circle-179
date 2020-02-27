@@ -5,6 +5,7 @@ import numpy as np  # numpy
 import xlwt  # xlwt
 from time import time
 from plus_reader.plus_reader import prc_list_of_files
+import pickle
 
 np.set_printoptions(linewidth=200)
 START_PATH = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__))))
@@ -148,9 +149,14 @@ def join_recognized_and_xlsx(recognized_pages, xlsx_data, stats):
             col_mov = 0
         if 'Результат' in item and item['Результат']:
             # print('foo', item['Результат'])
+            student_visited = 0
             for clmn, res in enumerate(item['Результат']):
                 if res:
                     sheet.write(rown, clmn + col_mov + 4, 1)
+                    student_visited = 1
+            # Если есть хотя бы один плюс, то школьник был. Ставим в этот столбец 1-ку.
+            if student_visited:
+                sheet.write(rown, 0 + col_mov + 4, 1)
     save_dest = os.path.join(START_PATH, '..', 'Сканы кондуитов', 'results.xls')
     lg.info('Сохраняем результат в ' + save_dest)
     workbook.save(save_dest)
@@ -162,7 +168,6 @@ if __name__ == '__main__':
     recognized_pages = prc_list_of_files(PDF_FILENAME, black_threshold=240,
                                          unmark_useless_cells_func=unmark_useless_cells,
                                          remove_useless_cells_func=remove_useless_cells)
-    import pickle
     with open('recognized.pickle', 'wb') as f:
         pickle.dump(recognized_pages, file=f)
     print('Done in ', time() - stt)
@@ -171,6 +176,7 @@ if __name__ == '__main__':
 
     os.chdir(r"..")
     xlsx_data = parse_xls_conduit(XLS_CONDUIT_NAME)
+    change_split_auds(xlsx_data)  # Заменяем 405 на 421, 422, 423, 424...
 
     stats = read_stats()
     join_recognized_and_xlsx(recognized_pages, xlsx_data, stats)

@@ -8,6 +8,7 @@ import re
 import ftplib
 
 # work = (bas, pro)
+# work = (bas,)
 # work = (pro,)
 # cur_les = 10
 NON_BREAKING_SPACE = '\u00A0'
@@ -60,11 +61,14 @@ def remove_comments_spaces_text_after_end_doc(data):
     data = data.replace('\\hfill', '')
     data = data.replace('\\break', '')
     data = re.sub(r'\\УстановитьГраницы.*', '', data)
-    data = re.sub(r'\\hangindent\s*-?\w+\\hangafter\s*-?\w+', '', data)
+    data = re.sub(r'\\hangindent=?[\w\-]+', '', data)
+    data = re.sub(r'\\hangafter=?[\w\-]+', '', data)
     data = re.sub(r'\\parshape(.*)\n', r'', data)
     data = re.sub(r'\\phantom\{.*?\}', '', data)
     data = re.sub(r'\\[vh]space\{.*?\}', '', data)
     data = data.replace(r'\mbox', '')
+    data = re.sub(r'\\объявление.*?\\кобъявление\s*', '', data, flags=re.DOTALL)
+    data = re.sub(r'\\важноеОбъявление.*?\\кважноеОбъявление\s*', '', data, flags=re.DOTALL)
     return data
 
 
@@ -110,7 +114,12 @@ def replace_single_characters(data):
         .replace(r'\hss', '') \
         .replace(r'\noindent', '') \
         .replace(r'\displaystyle', '') \
-        .replace(r'\qquad', ' ')
+        .replace(r'\qquad', ' ') \
+        .replace(r'\vfill', '') \
+        .replace(r'\newaaaaaalpage', '') \
+        .replace(r'\theFullTitleLine', '') \
+        .replace(r'\vfill', '') \
+        # foo
     data = re.sub(r'\\лк\s+', '«', data)
     data = re.sub(r'\\лк(?=\W)', '«', data)
     data = re.sub(r'\\пк(?=\W)', '» ', data)

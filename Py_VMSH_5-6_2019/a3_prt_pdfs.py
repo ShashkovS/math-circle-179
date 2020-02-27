@@ -22,6 +22,11 @@ def remove_old_pdfs(wrk):
     for name in os.listdir(PRINT_PDFS_PATH):
         if name.startswith(wrk['prt_pdf_prefix']) and name.lower().endswith('.pdf'):
             os.remove(os.path.join(PRINT_PDFS_PATH, name))
+        if name == '_all_all_all.pdf':
+            try:
+                os.remove(os.path.join(PRINT_PDFS_PATH, name))
+            except FileNotFoundError:
+                pass
 
 
 def crt_big_counduits(wrk, r_in_pdf_conduit, r_prev_name_conduit):
